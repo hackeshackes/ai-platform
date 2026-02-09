@@ -27,7 +27,7 @@ const Login: React.FC = () => {
       message.success('登录成功！');
       navigate('/dashboard');
     } catch (error: any) {
-      message.error(error.response?.data?.detail || '登录失败');
+      message.error(String(error.response?.data?.detail || error.message || '登录失败'));
     } finally {
       setLoading(false);
     }

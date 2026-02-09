@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Modal, Form, Input, message, Tag, Space, Select } from 'antd';
 import { PlusOutlined, DeleteOutlined, HistoryOutlined, SwapOutlined, RollbackOutlined } from '@ant-design/icons';
-import { api } from '../../api/client';
+import { api } from '../api/client';
 
 interface DatasetVersion {
   id: number;

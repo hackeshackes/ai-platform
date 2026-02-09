@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Select, Tag, Space, message } from 'antd';
 import { PlusOutlined, DeleteOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import { api } from '../../api/client';
+import { api } from '../api/client';
 
 interface Role {
   id: number;

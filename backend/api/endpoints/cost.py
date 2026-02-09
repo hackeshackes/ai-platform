@@ -203,10 +203,12 @@ async def get_cost_summary(
     
     v2.4: Cost Intelligence
     """
+    from datetime import datetime, timedelta
     prov = Provider(provider) if provider else None
     
     summary = cost_intelligence.get_cost_summary(
-        days_ago=days,
+        start_date=datetime.utcnow() - timedelta(days=days),
+        end_date=datetime.utcnow(),
         project_id=project_id,
         provider=prov
     )

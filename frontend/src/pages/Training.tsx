@@ -3,7 +3,7 @@
  */
 
 import { Card, Form, Input, Select, Button, Steps, Result, Table, Tag, Space, Progress, Timeline, message } from 'antd'
-import { RocketOutlined, CloudServerOutlined, DataOutlined, ExperimentOutlined, CheckCircleOutlined, PlayCircleOutlined } from '@ant-design/icons'
+import { RocketOutlined, CloudServerOutlined, DatabaseOutlined, ExperimentOutlined, CheckCircleOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 

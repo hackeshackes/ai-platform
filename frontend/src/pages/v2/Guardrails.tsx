@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Modal, Form, Input, Select, Space, Tag, Tabs, Statistic, Switch, Alert, List } from 'antd';
-import { PlusOutlined, ShieldOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { PlusOutlined, SafetyCertificateOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { api } from '../../api/client';
 
 const { Text, Title, Paragraph } = Typography;

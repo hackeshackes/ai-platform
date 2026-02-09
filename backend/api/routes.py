@@ -357,6 +357,24 @@ try:
 except ImportError:
     PLUGIN_MARKETPLACE_ENABLED = False
 
+# v3: Distillation Engine
+try:
+    from api.endpoints.distillation import router as distillation_router
+    router.include_router(distillation_router, prefix="/distillation", tags=["Distillation"])
+    DISTILLATION_ENABLED = True
+except ImportError as e:
+    print(f"Distillation module not available: {e}")
+    DISTILLATION_ENABLED = False
+
+# v3: LLM Providers Registry
+try:
+    from core.providers.registry import router as providers_router
+    router.include_router(providers_router, prefix="/providers", tags=["Providers"])
+    PROVIDERS_ENABLED = True
+except ImportError as e:
+    print(f"Providers module not available: {e}")
+    PROVIDERS_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -408,7 +426,9 @@ async def system_info():
             "collaboration": COLLABORATION_ENABLED,
             "cli": CLI_ENABLED,
             "cloud_integration": CLOUD_INTEGRATION_ENABLED,
-            "plugin_marketplace": PLUGIN_MARKETPLACE_ENABLED
+            "plugin_marketplace": PLUGIN_MARKETPLACE_ENABLED,
+            "distillation": DISTILLATION_ENABLED,
+            "providers": PROVIDERS_ENABLED
         },
         "version": "2.4.0-beta"
     }

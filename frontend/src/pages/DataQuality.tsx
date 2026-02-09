@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Statistic, Progress, Button, Upload, message, Table, Tag, List, Typography, Space } from 'antd';
 import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined, UploadOutlined, FileExcelOutlined } from '@ant-design/icons';
-import { api } from '../../api/client';
+import { api } from '../api/client';
 
 const { Title, Text } = Typography;
 

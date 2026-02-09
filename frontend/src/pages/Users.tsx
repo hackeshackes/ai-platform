@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Modal, Form, Input, Select, message, Tag, Space } from 'antd';
 import { PlusOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
-import { api } from '../../api/client';
+import { api } from '../api/client';
 
 interface User {
   id: number;
