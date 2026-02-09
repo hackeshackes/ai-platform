@@ -127,6 +127,14 @@ try:
 except ImportError:
     QUALITY_ENABLED = False
 
+# v2.1: Notebooks
+try:
+    from api.endpoints import notebooks
+    router.include_router(notebooks.router, prefix="/notebooks", tags=["Notebooks"])
+    NOTEBOOKS_ENABLED = True
+except ImportError:
+    NOTEBOOKS_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -156,7 +164,8 @@ async def system_info():
             "feature_store": FEATURE_STORE_ENABLED,
             "model_registry": MODEL_REGISTRY_ENABLED,
             "lineage": LINEAGE_ENABLED,
-            "quality": QUALITY_ENABLED
+            "quality": QUALITY_ENABLED,
+            "notebooks": NOTEBOOKS_ENABLED
         },
         "version": "2.1.0-beta"
     }
