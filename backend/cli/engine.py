@@ -37,9 +37,10 @@ class Command:
     name: str
     category: CommandCategory
     description: str
+    command_template: str
+    created_at: datetime = field(default_factory=datetime.utcnow)
     options: List[CLIOption] = field(default_factory=list)
     examples: List[str] = field(default_factory=list)
-    command_template: str
 
 @dataclass
 class CLISession:
@@ -57,9 +58,9 @@ class ScriptTemplate:
     description: str
     category: str
     content: str
-    variables: List[Dict] = field(default_factory=list)
     created_by: str
     created_at: datetime = field(default_factory=datetime.utcnow)
+    variables: List[Dict] = field(default_factory=list)
 
 class CLIEngine:
     """CLI引擎 v2.4"""

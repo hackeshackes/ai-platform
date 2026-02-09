@@ -82,8 +82,8 @@ class ComputeResource:
     resource_id: str
     provider: CloudProvider
     instance_type: str
-    status: str = "stopped"
     region: str
+    status: str = "stopped"
 
 @dataclass
 class SyncJob:
