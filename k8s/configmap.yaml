@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-platform-config
+  namespace: ai-platform
+data:
+  database_url: "postgresql://aiplatform:aiplatform123@ai-platform-postgres:5432/ai_platform"
+  redis_url: "redis://ai-platform-redis:6379/0"
+  mlflow_tracking_uri: "http://ai-platform-mlflow:5000"
