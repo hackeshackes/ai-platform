@@ -1,0 +1,247 @@
+"""
+gRPC proto定义 v2.2
+"""
+grpc_proto = '''
+syntax = "proto3";
+
+package ai_platform;
+
+service AIPlatformService {
+    // 通用
+    rpc HealthCheck(Empty) returns (HealthResponse);
+    rpc GetInfo(Empty) returns (InfoResponse);
+    
+    // 项目
+    rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse);
+    rpc GetProject(GetProjectRequest) returns (ProjectResponse);
+    rpc CreateProject(CreateProjectRequest) returns (ProjectResponse);
+    
+    // 实验
+    rpc ListExperiments(ListExperimentsRequest) returns (ListExperimentsResponse);
+    rpc CreateExperiment(CreateExperimentRequest) returns (ExperimentResponse);
+    
+    // 模型
+    rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+    rpc GetModel(GetModelRequest) returns (ModelResponse);
+    
+    // 训练
+    rpc StartTraining(StartTrainingRequest) returns (TrainingResponse);
+    rpc GetTrainingStatus(GetTrainingStatusRequest) returns (TrainingStatusResponse);
+    
+    // 推理
+    rpc Predict(PredictRequest) returns (PredictResponse);
+    
+    // v2.1: Feature Store
+    rpc ListFeatureGroups(Empty) returns (ListFeatureGroupsResponse);
+    rpc GetFeatureGroup(GetFeatureGroupRequest) returns (FeatureGroupResponse);
+    
+    // v2.2: LLM Tracing
+    rpc StartTrace(StartTraceRequest) returns (TraceResponse);
+    rpc EndTrace(EndTraceRequest) returns (Empty);
+    rpc GetTrace(GetTraceRequest) returns (TraceDetailResponse);
+    
+    // v2.2: 模型评估
+    rpc RunEvaluation(RunEvaluationRequest) returns (EvaluationResponse);
+    rpc GetEvaluation(GetEvaluationRequest) returns (EvaluationDetailResponse);
+}
+
+// 通用
+message Empty {}
+
+message HealthResponse {
+    bool healthy = 1;
+    string version = 2;
+}
+
+message InfoResponse {
+    string version = 1;
+    map<string, bool> services = 2;
+}
+
+// 项目
+message ListProjectsRequest {
+    int32 skip = 1;
+    int32 limit = 2;
+}
+
+message ListProjectsResponse {
+    repeated ProjectResponse projects = 1;
+    int32 total = 2;
+}
+
+message GetProjectRequest {
+    string project_id = 1;
+}
+
+message CreateProjectRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message ProjectResponse {
+    string project_id = 1;
+    string name = 2;
+    string description = 3;
+    string status = 4;
+    string created_at = 5;
+}
+
+// 实验
+message ListExperimentsRequest {
+    string project_id = 1;
+    int32 skip = 2;
+    int32 limit = 3;
+}
+
+message ListExperimentsResponse {
+    repeated ExperimentResponse experiments = 1;
+    int32 total = 2;
+}
+
+message CreateExperimentRequest {
+    string project_id = 1;
+    string name = 2;
+    string base_model = 3;
+}
+
+message ExperimentResponse {
+    string experiment_id = 1;
+    string name = 2;
+    string base_model = 3;
+    string status = 4;
+    map<string, double> metrics = 5;
+}
+
+// 模型
+message ListModelsRequest {
+    string project_id = 1;
+    int32 skip = 2;
+    int32 limit = 3;
+}
+
+message ListModelsResponse {
+    repeated ModelResponse models = 1;
+    int32 total = 2;
+}
+
+message GetModelRequest {
+    string model_id = 1;
+}
+
+message ModelResponse {
+    string model_id = 1;
+    string name = 2;
+    string version = 3;
+    string framework = 4;
+    map<string, double> metrics = 5;
+}
+
+// 训练
+message StartTrainingRequest {
+    string experiment_id = 1;
+    map<string, string> config = 2;
+}
+
+message TrainingResponse {
+    string task_id = 1;
+    string status = 2;
+}
+
+message GetTrainingStatusRequest {
+    string task_id = 1;
+}
+
+message TrainingStatusResponse {
+    string task_id = 1;
+    string status = 2;
+    map<string, double> metrics = 3;
+    string error = 4;
+}
+
+// 推理
+message PredictRequest {
+    string model_id = 1;
+    map<string, string> inputs = 2;
+}
+
+message PredictResponse {
+    map<string, string> outputs = 1;
+    double latency_ms = 2;
+}
+
+// v2.1: Feature Store
+message ListFeatureGroupsResponse {
+    repeated FeatureGroupResponse groups = 1;
+}
+
+message GetFeatureGroupRequest {
+    string group_id = 1;
+}
+
+message FeatureGroupResponse {
+    string group_id = 1;
+    string name = 2;
+    repeated FeatureInfo features = 3;
+}
+
+message FeatureInfo {
+    string name = 1;
+    string dtype = 2;
+}
+
+// v2.2: LLM Tracing
+message StartTraceRequest {
+    string name = 1;
+    map<string, string> metadata = 2;
+}
+
+message TraceResponse {
+    string trace_id = 1;
+}
+
+message EndTraceRequest {
+    string trace_id = 1;
+}
+
+message GetTraceRequest {
+    string trace_id = 1;
+}
+
+message TraceDetailResponse {
+    string trace_id = 1;
+    string name = 2;
+    repeated SpanResponse spans = 3;
+}
+
+message SpanResponse {
+    string span_id = 1;
+    string name = 2;
+    string type = 3;
+    double duration_ms = 4;
+}
+
+// v2.2: 模型评估
+message RunEvaluationRequest {
+    string model_id = 1;
+    string dataset_id = 2;
+    repeated string scorers = 3;
+}
+
+message EvaluationResponse {
+    string eval_id = 1;
+    string status = 2;
+}
+
+message GetEvaluationRequest {
+    string eval_id = 1;
+}
+
+message EvaluationDetailResponse {
+    string eval_id = 1;
+    string status = 2;
+    map<string, double> metrics = 3;
+}
+'''
+
+print("✅ gRPC proto定义已生成")
+print("保存到: backend/grpc/proto/ai_platform.proto")

@@ -167,6 +167,14 @@ try:
 except ImportError:
     DISTRIBUTED_ENABLED = False
 
+# v2.2: 插件系统
+try:
+    from api.endpoints import plugins
+    router.include_router(plugins.router, prefix="/plugins", tags=["Plugins"])
+    PLUGINS_ENABLED = True
+except ImportError:
+    PLUGINS_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -201,7 +209,8 @@ async def system_info():
             "llm_tracing": LLM_TRACING_ENABLED,
             "evaluation": EVALUATION_ENABLED,
             "multi_tenant": MULTI_TENANT_ENABLED,
-            "distributed": DISTRIBUTED_ENABLED
+            "distributed": DISTRIBUTED_ENABLED,
+            "plugins": PLUGINS_ENABLED
         },
         "version": "2.2.0-beta"
     }
