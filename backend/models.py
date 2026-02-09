@@ -133,6 +133,28 @@ class DatasetVersion(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     created_by = Column(Integer, ForeignKey('users.id'), nullable=True)
 
+# v1.1: 角色
+class Role(Base):
+    """角色"""
+    __tablename__ = "roles"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
+    permissions = Column(Text, nullable=True)  # 逗号分隔的权限列表
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+# v1.1: 项目权限
+class ProjectPermission(Base):
+    """项目权限"""
+    __tablename__ = "project_permissions"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    project_id = Column(Integer, ForeignKey('projects.id'), nullable=False)
+    role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 # 数据库连接
 DATABASE_URL = 'sqlite:///ai_platform.db'
 engine = create_engine(DATABASE_URL, echo=True)

@@ -106,6 +106,16 @@ export const usersAPI = {
   delete: (id: string) => apiClient.delete(`/api/v1/users/${id}`),
 };
 
+// 权限API v1.1
+export const rolesAPI = {
+  list: (params?: any) => apiClient.get('/api/v1/permissions/roles', { params }),
+  create: (data: any) => apiClient.post('/api/v1/permissions/roles', data),
+  get: (id: string) => apiClient.get(`/api/v1/permissions/roles/${id}`),
+  update: (id: string, data: any) => apiClient.put(`/api/v1/permissions/roles/${id}`, data),
+  delete: (id: string) => apiClient.delete(`/api/v1/permissions/roles/${id}`),
+  init: () => apiClient.post('/api/v1/permissions/roles/init'),
+};
+
 // 训练API
 export const trainingAPI = {
   models: () => apiClient.get('/api/v1/training/models'),
@@ -127,6 +137,7 @@ export const api = {
   versions: versionAPI,
   quality: qualityAPI,
   users: usersAPI,
+  roles: rolesAPI,
 };
 
 export default apiClient;

@@ -13,6 +13,7 @@ import Datasets from './pages/Datasets'
 import DatasetVersions from './pages/DatasetVersions'
 import DataQuality from './pages/DataQuality'
 import Users from './pages/Users'
+import Roles from './pages/Roles'
 import Models from './pages/Models'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
@@ -48,6 +49,7 @@ export default function App() {
     { key: '/dataset-versions', label: '版本管理' },
     { key: '/data-quality', label: '数据质量' },
     { key: '/users', label: '用户管理' },
+    { key: '/roles', label: '权限管理' },
     { key: '/models', label: t('nav.models') },
     { key: '/settings', label: t('nav.settings') },
   ]
@@ -95,6 +97,7 @@ export default function App() {
             <Route path="/dataset-versions" element={<PrivateRoute><DatasetVersions /></PrivateRoute>} />
             <Route path="/data-quality" element={<PrivateRoute><DataQuality /></PrivateRoute>} />
             <Route path="/users" element={<PrivateRoute><Users /></PrivateRoute>} />
+            <Route path="/roles" element={<PrivateRoute><Roles /></PrivateRoute>} />
             <Route path="/models" element={<PrivateRoute><Models /></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           </Routes>

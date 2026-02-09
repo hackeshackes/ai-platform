@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 
 # 导入所有端点
-from api.endpoints import auth, users, projects, experiments, tasks, datasets, models, health, gpu, metrics, training, inference, settings, versions, quality
+from api.endpoints import auth, users, projects, experiments, tasks, datasets, models, health, gpu, metrics, training, inference, settings, versions, quality, permissions
 
 router = APIRouter()
 
@@ -47,6 +47,9 @@ router.include_router(versions.router, prefix="/datasets", tags=["Versions"])
 
 # v1.1: 数据质量检查
 router.include_router(quality.router, prefix="/datasets", tags=["Quality"])
+
+# v1.1: 权限管理
+router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])
 
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
