@@ -191,6 +191,14 @@ try:
 except ImportError:
     AI_ASSISTANT_ENABLED = False
 
+# v2.3: Judge Builder
+try:
+    from api.endpoints import judges
+    router.include_router(judges.router, prefix="/judges", tags=["Judge Builder"])
+    JUDGE_BUILDER_ENABLED = True
+except ImportError:
+    JUDGE_BUILDER_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -228,7 +236,8 @@ async def system_info():
             "distributed": DISTRIBUTED_ENABLED,
             "plugins": PLUGINS_ENABLED,
             "ai_gateway": AI_GATEWAY_ENABLED,
-            "ai_assistant": AI_ASSISTANT_ENABLED
+            "ai_assistant": AI_ASSISTANT_ENABLED,
+            "judge_builder": JUDGE_BUILDER_ENABLED
         },
         "version": "2.3.0-beta"
     }
