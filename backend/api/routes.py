@@ -293,6 +293,30 @@ try:
 except ImportError:
     COST_INTELLIGENCE_ENABLED = False
 
+# v2.4: Model Serving
+try:
+    from api.endpoints import serving
+    router.include_router(serving.router, prefix="/serving", tags=["Model Serving"])
+    MODEL_SERVING_ENABLED = True
+except ImportError:
+    MODEL_SERVING_ENABLED = False
+
+# v2.4: A/B Testing
+try:
+    from api.endpoints import abtesting
+    router.include_router(abtesting.router, prefix="/abtesting", tags=["A/B Testing"])
+    AB_TESTING_ENABLED = True
+except ImportError:
+    AB_TESTING_ENABLED = False
+
+# v2.4: Edge Inference
+try:
+    from api.endpoints import edge
+    router.include_router(edge.router, prefix="/edge", tags=["Edge Inference"])
+    EDGE_INFERENCE_ENABLED = True
+except ImportError:
+    EDGE_INFERENCE_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -336,7 +360,10 @@ async def system_info():
             "optimization": OPTIMIZATION_ENABLED,
             "prompt_management": PROMPT_MANAGEMENT_ENABLED,
             "guardrails": GUARDRAILS_ENABLED,
-            "cost_intelligence": COST_INTELLIGENCE_ENABLED
+            "cost_intelligence": COST_INTELLIGENCE_ENABLED,
+            "model_serving": MODEL_SERVING_ENABLED,
+            "ab_testing": AB_TESTING_ENABLED,
+            "edge_inference": EDGE_INFERENCE_ENABLED
         },
         "version": "2.4.0-beta"
     }
