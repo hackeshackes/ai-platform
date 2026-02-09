@@ -4,7 +4,29 @@ LLM Guardrails API端点 v2.4
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Dict, Any
 
-from backend.guardrails.engine import guardrails_engine, GuardrailType, Severity, Action
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'guardrails/engine.py')
+
+spec = importlib.util.spec_from_file_location("guardrails_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    guardrails_engine = module.guardrails_engine
+    GuardrailType = module.GuardrailType
+    Severity = module.Severity
+    Action = module.Action
+except Exception as e:
+    print(f"Failed to import guardrails module: {e}")
+    guardrails_engine = None
+    GuardrailType = None
+    Severity = None
+    Action = None
 
 router = APIRouter()
 

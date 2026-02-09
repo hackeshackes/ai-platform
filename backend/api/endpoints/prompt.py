@@ -5,8 +5,29 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
-from backend.prompt.manager import prompt_manager, PromptType, PromptStatus
-from backend.core.auth import get_current_user
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'prompt/manager.py')
+
+spec = importlib.util.spec_from_file_location("prompt_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    prompt_manager = module.prompt_manager
+    PromptType = module.PromptType
+    PromptStatus = module.PromptStatus
+except Exception as e:
+    print(f"Failed to import prompt module: {e}")
+    prompt_manager = None
+    PromptType = None
+    PromptStatus = None
+
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 
@@ -229,6 +250,19 @@ async def list_prompts(
         ]
     }
 
+@router.get("/health")
+async def prompt_health():
+    """
+    Prompt Management健康检查
+    
+    v2.4: Prompt Management
+    """
+    return {
+        "status": "healthy",
+        "templates": len(prompt_manager.templates),
+        "prompts": len(prompt_manager.prompts)
+    }
+
 @router.post("")
 async def create_prompt(request: CreatePromptModel):
     """
@@ -442,16 +476,3 @@ async def get_prompt_summary():
     """
     summary = prompt_manager.get_prompt_summary()
     return summary
-
-@router.get("/health")
-async def prompt_health():
-    """
-    Prompt Management健康检查
-    
-    v2.4: Prompt Management
-    """
-    return {
-        "status": "healthy",
-        "templates": len(prompt_manager.templates),
-        "prompts": len(prompt_manager.prompts)
-    }

@@ -6,7 +6,27 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 
-from backend.cost.intelligence import cost_intelligence, CostType, Provider
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'cost/intelligence.py')
+
+spec = importlib.util.spec_from_file_location("cost_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    cost_intelligence = module.cost_intelligence
+    CostType = module.CostType
+    Provider = module.Provider
+except Exception as e:
+    print(f"Failed to import cost module: {e}")
+    cost_intelligence = None
+    CostType = None
+    Provider = None
 
 router = APIRouter()
 
