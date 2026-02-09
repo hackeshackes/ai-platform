@@ -71,6 +71,22 @@ try:
 except ImportError:
     MONITORING_ENABLED = False
 
+# v2.0 Phase 3: AutoML
+try:
+    from api.endpoints.automl import hpo
+    router.include_router(hpo.router, prefix="/automl", tags=["AutoML"])
+    AUTOML_ENABLED = True
+except ImportError:
+    AUTOML_ENABLED = False
+
+# v2.0 Phase 3: RAG
+try:
+    from api.endpoints.rag import pipeline
+    router.include_router(pipeline.router, prefix="/rag", tags=["RAG"])
+    RAG_ENABLED = True
+except ImportError:
+    RAG_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -93,7 +109,9 @@ async def system_info():
             "backend": "running",
             "database": "postgresql",
             "cache": "redis",
-            "pipeline": "v2.0"
+            "pipeline": "v2.0",
+            "automl": AUTOML_ENABLED,
+            "rag": RAG_ENABLED
         },
         "version": "2.0.0-beta"
     }
