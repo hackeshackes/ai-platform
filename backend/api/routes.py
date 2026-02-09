@@ -269,6 +269,30 @@ try:
 except ImportError:
     OPTIMIZATION_ENABLED = False
 
+# v2.4: Prompt Management
+try:
+    from api.endpoints import prompt
+    router.include_router(prompt.router, prefix="/prompts", tags=["Prompt Management"])
+    PROMPT_MANAGEMENT_ENABLED = True
+except ImportError:
+    PROMPT_MANAGEMENT_ENABLED = False
+
+# v2.4: LLM Guardrails
+try:
+    from api.endpoints import guardrails
+    router.include_router(guardrails.router, prefix="/guardrails", tags=["LLM Guardrails"])
+    GUARDRAILS_ENABLED = True
+except ImportError:
+    GUARDRAILS_ENABLED = False
+
+# v2.4: Cost Intelligence
+try:
+    from api.endpoints import cost
+    router.include_router(cost.router, prefix="/cost", tags=["Cost Intelligence"])
+    COST_INTELLIGENCE_ENABLED = True
+except ImportError:
+    COST_INTELLIGENCE_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -309,7 +333,10 @@ async def system_info():
             "ai_assistant": AI_ASSISTANT_ENABLED,
             "judge_builder": JUDGE_BUILDER_ENABLED,
             "ray_data": RAY_DATA_ENABLED,
-            "optimization": OPTIMIZATION_ENABLED
+            "optimization": OPTIMIZATION_ENABLED,
+            "prompt_management": PROMPT_MANAGEMENT_ENABLED,
+            "guardrails": GUARDRAILS_ENABLED,
+            "cost_intelligence": COST_INTELLIGENCE_ENABLED
         },
-        "version": "2.3.0-beta"
+        "version": "2.4.0-beta"
     }
