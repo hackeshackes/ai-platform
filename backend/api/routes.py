@@ -317,6 +317,22 @@ try:
 except ImportError:
     EDGE_INFERENCE_ENABLED = False
 
+# v2.4: Visualization
+try:
+    from api.endpoints import visualization
+    router.include_router(visualization.router, prefix="/visualization", tags=["Visualization"])
+    VISUALIZATION_ENABLED = True
+except ImportError:
+    VISUALIZATION_ENABLED = False
+
+# v2.4: Collaboration
+try:
+    from api.endpoints import collaboration
+    router.include_router(collaboration.router, prefix="/collaboration", tags=["Collaboration"])
+    COLLABORATION_ENABLED = True
+except ImportError:
+    COLLABORATION_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -363,7 +379,9 @@ async def system_info():
             "cost_intelligence": COST_INTELLIGENCE_ENABLED,
             "model_serving": MODEL_SERVING_ENABLED,
             "ab_testing": AB_TESTING_ENABLED,
-            "edge_inference": EDGE_INFERENCE_ENABLED
+            "edge_inference": EDGE_INFERENCE_ENABLED,
+            "visualization": VISUALIZATION_ENABLED,
+            "collaboration": COLLABORATION_ENABLED
         },
         "version": "2.4.0-beta"
     }
