@@ -46,11 +46,11 @@ class PromptTemplate:
     description: str
     prompt_type: PromptType
     template: str  # Jinja2 template
-    parameters: List[PromptParameter] = field(default_factory=list)
-    examples: List[Dict] = field(default_factory=list)
     created_by: str
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
+    parameters: List[PromptParameter] = field(default_factory=list)
+    examples: List[Dict] = field(default_factory=list)
 
 @dataclass
 class PromptVersion:
@@ -59,10 +59,10 @@ class PromptVersion:
     prompt_id: str
     version: int
     template: str
-    parameters: List[PromptParameter] = field(default_factory=list)
-    changelog: str = ""
     created_by: str
     created_at: datetime = field(default_factory=datetime.utcnow)
+    parameters: List[PromptParameter] = field(default_factory=list)
+    changelog: str = ""
 
 @dataclass
 class Prompt:
@@ -73,13 +73,13 @@ class Prompt:
     template_id: str
     prompt_type: PromptType
     status: PromptStatus
+    created_by: str
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    updated_at: datetime = field(default_factory=datetime.utcnow)
     tags: List[str] = field(default_factory=list)
     versions: List[PromptVersion] = field(default_factory=list)
     current_version: int = 1
     metrics: Dict = field(default_factory=dict)  # usage, score, etc.
-    created_by: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    updated_at: datetime = field(default_factory=datetime.utcnow)
 
 @dataclass
 class PromptTestResult:

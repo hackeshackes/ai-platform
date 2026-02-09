@@ -36,12 +36,12 @@ class GuardrailRule:
     description: str
     guardrail_type: GuardrailType
     severity: Severity
+    created_at: datetime = field(default_factory=datetime.utcnow)
     pattern: Optional[str] = None  # Regex pattern
     keywords: List[str] = field(default_factory=list)
     action: Action = Action.BLOCK
     enabled: bool = True
     config: Dict = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.utcnow)
 
 @dataclass
 class GuardrailResult:
@@ -62,13 +62,13 @@ class GuardrailConfig:
     config_id: str
     name: str
     description: str
+    created_by: str
+    created_at: datetime = field(default_factory=datetime.utcnow)
     input_rules: List[str] = field(default_factory=list)  # rule_ids
     output_rules: List[str] = field(default_factory=list)
     behavior_rules: List[str] = field(default_factory=list)
     default_action: Action = Action.BLOCK
     enabled: bool = True
-    created_by: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
 
 class GuardrailsEngine:
     """Guardrails引擎"""
