@@ -37,11 +37,11 @@ class Team:
     team_id: str
     name: str
     description: str
-    members: List[Dict] = field(default_factory=list)
-    projects: List[str] = field(default_factory=list)
     created_by: str
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
+    members: List[Dict] = field(default_factory=list)
+    projects: List[str] = field(default_factory=list)
 
 @dataclass
 class TeamMember:
@@ -61,11 +61,11 @@ class Review:
     review_type: str  # code, model, experiment
     target_id: str  # commit, model_version, experiment_id
     status: ReviewStatus
-    comments: List[Dict] = field(default_factory=list)
     requested_by: str
-    reviewers: List[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
+    comments: List[Dict] = field(default_factory=list)
+    reviewers: List[str] = field(default_factory=list)
 
 @dataclass
 class ReviewComment:

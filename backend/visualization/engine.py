@@ -34,12 +34,12 @@ class ChartConfig:
     data_source: str  # experiments, models, cost
     x_axis: str
     y_axis: List[str]
+    created_by: str
+    created_at: datetime = field(default_factory=datetime.utcnow)
     group_by: Optional[str] = None
     filters: Dict = field(default_factory=dict)
     title: Optional[str] = None
     description: Optional[str] = None
-    created_by: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
 
 @dataclass
 class Report:
@@ -48,12 +48,12 @@ class Report:
     name: str
     description: str
     report_type: ReportType
-    charts: List[Dict] = field(default_factory=list)
-    sections: List[Dict] = field(default_factory=dict)
-    template_id: Optional[str] = None
     created_by: str
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
+    charts: List[Dict] = field(default_factory=list)
+    sections: List[Dict] = field(default_factory=dict)
+    template_id: Optional[str] = None
 
 @dataclass
 class ExperimentComparison:
@@ -62,9 +62,9 @@ class ExperimentComparison:
     name: str
     experiment_ids: List[str]
     metrics: List[str]
-    group_by: Optional[str] = None
     created_by: str
     created_at: datetime = field(default_factory=datetime.utcnow)
+    group_by: Optional[str] = None
 
 @dataclass
 class Dashboard:
@@ -72,11 +72,11 @@ class Dashboard:
     dashboard_id: str
     name: str
     description: str
+    created_by: str
+    created_at: datetime = field(default_factory=datetime.utcnow)
     widgets: List[Dict] = field(default_factory=list)
     layout: Dict = field(default_factory=dict)
     refresh_interval: int = 300  # seconds
-    created_by: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
 
 class VisualizationEngine:
     """可视化引擎 v2.4"""
