@@ -103,6 +103,14 @@ try:
 except ImportError:
     FEATURE_STORE_ENABLED = False
 
+# v2.1: Model Registry
+try:
+    from api.endpoints import registry
+    router.include_router(registry.router, prefix="/model-registry", tags=["Model Registry"])
+    MODEL_REGISTRY_ENABLED = True
+except ImportError:
+    MODEL_REGISTRY_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -129,7 +137,8 @@ async def system_info():
             "automl": AUTOML_ENABLED,
             "rag": RAG_ENABLED,
             "agents": AGENTS_ENABLED,
-            "feature_store": FEATURE_STORE_ENABLED
+            "feature_store": FEATURE_STORE_ENABLED,
+            "model_registry": MODEL_REGISTRY_ENABLED
         },
         "version": "2.1.0-beta"
     }
