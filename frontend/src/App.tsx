@@ -20,6 +20,25 @@ import Login from './pages/Login'
 import GPU from './pages/GPU'
 import LossChart from './pages/LossChart'
 
+// v2 页面
+import AutoML from './pages/v2/AutoML'
+import FeatureStore from './pages/v2/FeatureStore'
+import Notebooks from './pages/v2/Notebooks'
+import RAG from './pages/v2/RAG'
+
+// v2.4 页面
+import Prompts from './pages/v2/Prompts'
+import Guardrails from './pages/v2/Guardrails'
+import Cost from './pages/v2/Cost'
+import Serving from './pages/v2/Serving'
+import ABTesting from './pages/v2/ABTesting'
+import Edge from './pages/v2/Edge'
+import Visualizations from './pages/v2/Visualizations'
+import Collaboration from './pages/v2/Collaboration'
+import CLISettings from './pages/v2/CLISettings'
+import CloudSettings from './pages/v2/CloudSettings'
+import Plugins from './pages/v2/Plugins'
+
 // 路由守卫
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('access_token')
@@ -48,13 +67,31 @@ export default function App() {
     { key: '/datasets', label: t('nav.datasets') },
     { key: '/dataset-versions', label: '版本管理' },
     { key: '/data-quality', label: '数据质量' },
+    { type: 'divider' },
+    { key: '/prompts', label: 'Prompts' },
+    { key: '/guardrails', label: 'Guardrails' },
+    { key: '/cost', label: 'Cost' },
+    { key: '/serving', label: 'Serving' },
+    { key: '/abtesting', label: 'A/B Testing' },
+    { key: '/edge', label: 'Edge' },
+    { key: '/visualizations', label: 'Visualization' },
+    { key: '/collaboration', label: 'Collaboration' },
+    { type: 'divider' },
+    { key: '/automl', label: 'AutoML' },
+    { key: '/feature-store', label: 'Feature Store' },
+    { key: '/notebooks', label: 'Notebooks' },
+    { key: '/rag', label: 'RAG' },
+    { type: 'divider' },
     { key: '/users', label: '用户管理' },
     { key: '/roles', label: '权限管理' },
     { key: '/models', label: t('nav.models') },
     { key: '/settings', label: t('nav.settings') },
+    { key: '/cli', label: 'CLI' },
+    { key: '/cloud', label: 'Cloud' },
+    { key: '/plugins', label: 'Plugins' },
   ]
 
-  const selectedKey = menuItems.find(item => location.pathname.startsWith(item.key))?.key || '/dashboard'
+  const selectedKey = menuItems.find(item => item.key && location.pathname.startsWith(item.key))?.key || '/dashboard'
 
   return (
     <ALayout style={{ minHeight: '100vh' }}>
@@ -100,6 +137,25 @@ export default function App() {
             <Route path="/roles" element={<PrivateRoute><Roles /></PrivateRoute>} />
             <Route path="/models" element={<PrivateRoute><Models /></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+            
+            {/* v2 Pages */}
+            <Route path="/automl" element={<PrivateRoute><AutoML /></PrivateRoute>} />
+            <Route path="/feature-store" element={<PrivateRoute><FeatureStore /></PrivateRoute>} />
+            <Route path="/notebooks" element={<PrivateRoute><Notebooks /></PrivateRoute>} />
+            <Route path="/rag" element={<PrivateRoute><RAG /></PrivateRoute>} />
+            
+            {/* v2.4 Pages */}
+            <Route path="/prompts" element={<PrivateRoute><Prompts /></PrivateRoute>} />
+            <Route path="/guardrails" element={<PrivateRoute><Guardrails /></PrivateRoute>} />
+            <Route path="/cost" element={<PrivateRoute><Cost /></PrivateRoute>} />
+            <Route path="/serving" element={<PrivateRoute><Serving /></PrivateRoute>} />
+            <Route path="/abtesting" element={<PrivateRoute><ABTesting /></PrivateRoute>} />
+            <Route path="/edge" element={<PrivateRoute><Edge /></PrivateRoute>} />
+            <Route path="/visualizations" element={<PrivateRoute><Visualizations /></PrivateRoute>} />
+            <Route path="/collaboration" element={<PrivateRoute><Collaboration /></PrivateRoute>} />
+            <Route path="/cli" element={<PrivateRoute><CLISettings /></PrivateRoute>} />
+            <Route path="/cloud" element={<PrivateRoute><CloudSettings /></PrivateRoute>} />
+            <Route path="/plugins" element={<PrivateRoute><Plugins /></PrivateRoute>} />
           </Routes>
         </Content>
       </ALayout>
