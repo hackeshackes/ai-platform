@@ -111,6 +111,14 @@ try:
 except ImportError:
     MODEL_REGISTRY_ENABLED = False
 
+# v2.1: Model Lineage
+try:
+    from api.endpoints import lineage
+    router.include_router(lineage.router, prefix="/lineage", tags=["Lineage"])
+    LINEAGE_ENABLED = True
+except ImportError:
+    LINEAGE_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -138,7 +146,8 @@ async def system_info():
             "rag": RAG_ENABLED,
             "agents": AGENTS_ENABLED,
             "feature_store": FEATURE_STORE_ENABLED,
-            "model_registry": MODEL_REGISTRY_ENABLED
+            "model_registry": MODEL_REGISTRY_ENABLED,
+            "lineage": LINEAGE_ENABLED
         },
         "version": "2.1.0-beta"
     }
