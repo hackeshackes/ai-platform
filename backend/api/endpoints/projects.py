@@ -1,9 +1,15 @@
-"""Project endpoints"""
-from fastapi import APIRouter, HTTPException, Depends
+"""
+Project endpoints v2.0 - 带缓存
+"""
+from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import List, Optional
 from pydantic import BaseModel
-from datetime import datetime, timedelta
+from datetime import datetime
 import uuid
+
+# v2.0 导入
+from core.cache_service import cache_service
+from core.auth import get_current_user
 
 router = APIRouter()
 
@@ -15,10 +21,7 @@ fake_projects_db = {
         "description": "Llama 2 微调示例项目",
         "owner_id": 1,
         "status": "active",
-        "settings": {
-            "training_framework": "deepspeed",
-            "compute_type": "gpu"
-        },
+        "settings": {"training_framework": "deepspeed"},
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     }
@@ -36,8 +39,31 @@ class ProjectUpdate(BaseModel):
     settings: Optional[dict] = None
 
 @router.get("")
-async def list_projects(skip: int = 0, limit: int = 100, owner_id: Optional[int] = None):
-    """获取项目列表"""
+async def list_projects(
+    skip: int = 0,
+    limit: int = 100,
+    owner_id: Optional[int] = None,
+    current_user = Depends(get_current_user)
+):
+    """
+    获取项目列表
+    
+    v2.0: 使用缓存
+    """
+    # v2.0: 尝试从缓存获取
+    cached_result = await cache_service.get_user_projects_cached(
+        {"owner_id": owner_id} if owner_id else {},
+        owner_id or current_user.id
+    )
+    
+    if cached_result is not None:
+        return {
+            "total": len(cached_result),
+            "projects": cached_result[skip:skip+limit],
+            "cached": True
+        }
+    
+    # 缓存未命中，从数据库获取
     projects = list(fake_projects_db.values())
     
     if owner_id:
@@ -45,52 +71,110 @@ async def list_projects(skip: int = 0, limit: int = 100, owner_id: Optional[int]
     
     return {
         "total": len(projects),
-        "projects": projects[skip:skip+limit]
+        "projects": projects[skip:skip+limit],
+        "cached": False
     }
 
-@router.get("/{project_id}")
-async def get_project(project_id: int):
-    """获取单个项目"""
-    if project_id not in fake_projects_db:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return fake_projects_db[project_id]
-
-@router.post("", response_model=dict, status_code=201)
-async def create_project(project_data: ProjectCreate):
-    """创建项目"""
-    project_id = len(fake_projects_db) + 1
+@router.post("")
+async def create_project(
+    project: ProjectCreate,
+    current_user = Depends(get_current_user)
+):
+    """
+    创建项目
     
+    v2.0: 清除缓存
+    """
+    # 创建项目
     new_project = {
-        "id": project_id,
-        "name": project_data.name,
-        "description": project_data.description,
-        "owner_id": 1,  # 从认证中获取
+        "id": len(fake_projects_db) + 1,
+        "name": project.name,
+        "description": project.description,
+        "owner_id": current_user.id,
         "status": "active",
-        "settings": project_data.settings or {},
+        "settings": project.settings or {},
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     }
     
-    fake_projects_db[project_id] = new_project
+    fake_projects_db[new_project["id"]] = new_project
+    
+    # v2.0: 清除项目列表缓存
+    await cache_service.invalidate_user_projects(current_user.id)
+    
     return new_project
 
 @router.put("/{project_id}")
-async def update_project(project_id: int, project_data: ProjectUpdate):
-    """更新项目"""
+async def update_project(
+    project_id: int,
+    project_update: ProjectUpdate,
+    current_user = Depends(get_current_user)
+):
+    """
+    更新项目
+    
+    v2.0: 清除缓存
+    """
     if project_id not in fake_projects_db:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise HTTPException(status_code=404, detail="项目不存在")
     
-    for field, value in project_data.dict(exclude_unset=True).items():
-        fake_projects_db[project_id][field] = value
+    project = fake_projects_db[project_id]
     
-    fake_projects_db[project_id]["updated_at"] = datetime.utcnow()
-    return fake_projects_db[project_id]
+    # 更新字段
+    if project_update.name is not None:
+        project["name"] = project_update.name
+    if project_update.description is not None:
+        project["description"] = project_update.description
+    if project_update.status is not None:
+        project["status"] = project_update.status
+    if project_update.settings is not None:
+        project["settings"] = project_update.settings
+    
+    project["updated_at"] = datetime.utcnow()
+    
+    # v2.0: 清除缓存
+    await cache_service.invalidate_user_projects(current_user.id)
+    
+    return project
 
-@router.delete("/{project_id}", status_code=204)
-async def delete_project(project_id: int):
-    """删除项目"""
+@router.delete("/{project_id}")
+async def delete_project(
+    project_id: int,
+    current_user = Depends(get_current_user)
+):
+    """
+    删除项目
+    
+    v2.0: 清除缓存
+    """
     if project_id not in fake_projects_db:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise HTTPException(status_code=404, detail="项目不存在")
     
     del fake_projects_db[project_id]
-    return None
+    
+    # v2.0: 清除缓存
+    await cache_service.invalidate_user_projects(current_user.id)
+    
+    return {"message": "项目已删除"}
+
+@router.get("/stats")
+async def get_project_stats():
+    """
+    获取项目统计
+    
+    v2.0: 使用缓存
+    """
+    cached_stats = cache.get("project:stats")
+    if cached_stats:
+        return cached_stats
+    
+    stats = {
+        "total_projects": len(fake_projects_db),
+        "active_projects": sum(1 for p in fake_projects_db.values() if p["status"] == "active"),
+        "completed_projects": sum(1 for p in fake_projects_db.values() if p["status"] == "completed"),
+    }
+    
+    # 缓存5分钟
+    cache.set("project:stats", stats, "project_list")
+    
+    return stats
