@@ -175,6 +175,14 @@ try:
 except ImportError:
     PLUGINS_ENABLED = False
 
+# v2.3: AI Gateway
+try:
+    from api.endpoints import gateway
+    router.include_router(gateway.router, prefix="/gateway", tags=["AI Gateway"])
+    AI_GATEWAY_ENABLED = True
+except ImportError:
+    AI_GATEWAY_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -210,7 +218,8 @@ async def system_info():
             "evaluation": EVALUATION_ENABLED,
             "multi_tenant": MULTI_TENANT_ENABLED,
             "distributed": DISTRIBUTED_ENABLED,
-            "plugins": PLUGINS_ENABLED
+            "plugins": PLUGINS_ENABLED,
+            "ai_gateway": AI_GATEWAY_ENABLED
         },
-        "version": "2.2.0-beta"
+        "version": "2.3.0-beta"
     }
