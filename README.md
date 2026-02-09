@@ -1,18 +1,42 @@
 # AI Platform - 大模型全生命周期管理平台
 
+<div align="center">
+
+![AI Platform](https://img.shields.io/badge/AI-Platform-blue?style=for-the-badge)
+![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)
+![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?style=flat-square&logo=fastapi)
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?style=flat-square&logo=python)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+**一个用于管理大语言模型训练、推理和部署的完整平台**
+
+[English](README.md) | [中文](README_CN.md)
+
+</div>
+
+---
+
 ## 📊 项目概述
 
-AI Platform 是一个用于管理大语言模型训练、推理和部署的完整平台。
+AI Platform 是一个专为大语言模型(LLM)设计的全生命周期管理平台，提供从数据准备到模型部署的完整解决方案。
 
-**核心特性：**
-- 🖥️ GPU实时监控 - 竞品普遍缺失，核心差异化功能
-- 📈 Loss可视化 - ECharts专业图表
-- 🚀 轻量级 - 开箱即用，比MLflow更简单
-- 🇨🇳 中文本地化 - 国际化竞品的中文支持弱
+### ✨ 核心特性
+
+| 特性 | 说明 |
+|------|------|
+| 🖥️ **GPU实时监控** | 竞品普遍缺失，核心差异化功能 |
+| 📈 **Loss可视化** | ECharts专业图表，支持缩放拖拽 |
+| 🚀 **轻量级** | 开箱即用，比MLflow更简单 |
+| 🇨🇳 **中文本地化** | 国际化竞品的中文支持弱 |
+| 🔐 **安全认证** | JWT双令牌认证体系 |
+
+---
 
 ## ✅ 已完成功能
 
 ### 核心功能
+
 - **用户认证** - JWT登录/注册/Token管理
 - **项目管理** - 创建、编辑、删除项目
 - **任务管理** - 训练/推理任务状态追踪
@@ -20,40 +44,58 @@ AI Platform 是一个用于管理大语言模型训练、推理和部署的完�
 - **模型管理** - 模型版本、评估指标
 
 ### 监控功能
+
 - **GPU监控** - 实时显存、利用率、温度
 - **Loss曲线** - ECharts可视化、缩放拖拽
 - **任务日志** - 实时日志查看
 
 ### 训练与推理
+
 - **训练任务** - 4步向导提交训练
 - **推理服务** - 在线推理、推理历史
 
+---
+
 ## 🛠️ 技术栈
 
-| 层级 | 技术 | 版本 |
+### 前端技术
+
+| 技术 | 版本 | 用途 |
 |------|------|------|
-| **前端框架** | React | 18.x |
-| **前端语言** | TypeScript | 5.x |
-| **构建工具** | Vite | 5.x |
-| **UI组件库** | Ant Design | 5.x |
-| **图表库** | ECharts | 6.x |
-| **HTTP客户端** | Axios | - |
-| **后端框架** | FastAPI | - |
-| **后端语言** | Python | 3.14 |
-| **数据库** | SQLite | - |
-| **认证** | JWT (PyJWT) | - |
+| React | 18.x | UI框架 |
+| TypeScript | 5.x | 类型安全 |
+| Vite | 5.x | 构建工具 |
+| Ant Design | 5.x | UI组件库 |
+| ECharts | 6.x | 图表可视化 |
+| Axios | - | HTTP客户端 |
+| React Router | 6.x | 路由管理 |
+
+### 后端技术
+
+| 技术 | 版本 | 用途 |
+|------|------|------|
+| FastAPI | - | Web框架 |
+| Python | 3.14 | 编程语言 |
+| SQLite | - | 数据库 |
+| SQLAlchemy | 2.x | ORM |
+| Pydantic | 2.x | 数据验证 |
+| PyJWT | - | 认证 |
+| Passlib | - | 密码加密 |
+| PyNVML | 12.x | GPU监控 |
+
+---
 
 ## 📁 项目结构
 
 ```
 ai-platform/
-├── frontend/                 # 前端项目 (React + TypeScript)
+├── frontend/                 # 前端项目
 │   ├── src/
-│   │   ├── api/            # API客户端封装
-│   │   │   └── client.ts    # Axios配置 + API方法
+│   │   ├── api/            # API客户端
+│   │   │   └── client.ts    # Axios封装
 │   │   ├── components/      # 共享组件
-│   │   ├── locales/         # 国际化 (中英文)
-│   │   ├── pages/          # 页面组件 (11个)
+│   │   ├── locales/        # 国际化
+│   │   ├── pages/          # 页面组件
 │   │   │   ├── Login.tsx    # 登录页
 │   │   │   ├── Dashboard.tsx # 仪表盘
 │   │   │   ├── Projects.tsx # 项目管理
@@ -64,37 +106,50 @@ ai-platform/
 │   │   │   ├── LossChart.tsx # Loss曲线
 │   │   │   ├── Training.tsx # 训练任务
 │   │   │   ├── Inference.tsx # 推理服务
-│   │   │   └── Settings.tsx # 系统设置
-│   │   ├── App.tsx        # 主应用组件
-│   │   └── main.tsx       # 入口文件
-│   ├── package.json       # 前端依赖
+│   │   │   ├── Settings.tsx # 系统设置
+│   │   │   ├── DatasetVersions.tsx # 版本管理
+│   │   │   └── DataQuality.tsx # 数据质量
+│   │   ├── App.tsx        # 主应用
+│   │   └── main.tsx       # 入口
+│   ├── package.json       # 依赖配置
 │   └── vite.config.ts    # Vite配置
 │
-├── backend/                  # 后端项目 (FastAPI)
+├── backend/                  # 后端项目
 │   ├── api/
-│   │   ├── endpoints/      # API端点 (11个)
-│   │   │   ├── auth.py      # 认证模块
-│   │   │   ├── projects.py  # 项目管理
-│   │   │   ├── tasks.py    # 任务管理
-│   │   │   ├── datasets.py  # 数据集管理
-│   │   │   ├── models.py   # 模型管理
+│   │   ├── endpoints/      # API端点
+│   │   │   ├── auth.py      # 认证
+│   │   │   ├── projects.py  # 项目
+│   │   │   ├── tasks.py    # 任务
+│   │   │   ├── datasets.py  # 数据集
+│   │   │   ├── models.py   # 模型
 │   │   │   ├── gpu.py      # GPU监控
-│   │   │   ├── metrics.py  # 训练指标
-│   │   │   ├── training.py  # 训练任务
-│   │   │   ├── inference.py # 推理服务
-│   │   │   └── settings.py # 系统设置
-│   │   └── routes.py     # 路由聚合
+│   │   │   ├── metrics.py  # 指标
+│   │   │   ├── training.py  # 训练
+│   │   │   ├── inference.py # 推理
+│   │   │   ├── settings.py # 设置
+│   │   │   ├── versions.py # 版本(v1.1)
+│   │   │   ├── quality.py # 质量(v1.1)
+│   │   │   └── users.py   # 用户(v1.1)
+│   │   └── routes.py     # 路由
+│   ├── core/
+│   │   └── quality_checker.py # 质量检查
 │   ├── main.py           # FastAPI入口
 │   └── models.py         # 数据模型
 │
-└── docs/                    # 项目文档
-    ├── API.md              # API文档
-    ├── DEPLOYMENT.md       # 部署文档
-    ├── USER_MANUAL.md      # 用户手册
-    ├── DEVELOPMENT.md     # 开发文档
-    ├── ROADMAP.md         # 路线图
-    └── V1.1_PLAN.md      # v1.1规划
+├── docs/                    # 文档
+│   ├── API.md              # API文档
+│   ├── DEPLOYMENT.md      # 部署文档
+│   ├── USER_MANUAL.md     # 用户手册
+│   ├── DEVELOPMENT.md     # 开发文档
+│   ├── ROADMAP.md         # 路线图
+│   └── TEST_REPORT.md     # 测试报告
+│
+├── requirements.txt        # Python依赖
+├── .gitignore             # Git忽略
+└── README.md              # 说明文档
 ```
+
+---
 
 ## 🚀 快速开始
 
@@ -107,12 +162,18 @@ ai-platform/
 | npm | 9.x | 10.x |
 | pip | 23.x | 24.x |
 
+### 前置条件
+
+- Node.js 和 npm 已安装
+- Python 3.10+ 已安装
+- Git 已安装
+
 ### 安装步骤
 
 #### 1. 克隆项目
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/hackeshackes/ai-platform.git
 cd ai-platform
 ```
 
@@ -135,14 +196,39 @@ pip install -r requirements.txt
 ```
 
 **requirements.txt 内容：**
-```
+```txt
+# AI Platform Backend Dependencies
+# Generated: 2026-02-08
+
+# Web Framework
 fastapi>=0.109.0
-uvicorn>=0.27.0
+uvicorn[standard]>=0.27.0
+
+# Data Validation
 pydantic>=2.5.0
-python-jose>=3.3.0
-passlib>=1.7.4
+email-validator>=2.1.0
+
+# Authentication
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
 python-multipart>=0.0.6
+
+# Database
+sqlalchemy>=2.0.0
+
+# GPU Monitoring (optional)
 pynvml>=12.0.0
+
+# File Upload
+python-magic>=0.4.27
+
+# Configuration
+pyyaml>=6.0.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
 ```
 
 #### 3. 前端安装
@@ -215,27 +301,89 @@ VITE v5.x.x  ready in xxx ms
 |--------|------|------|
 | admin | admin123 | 管理员 |
 
+---
+
+## 📖 使用手册
+
+### 登录认证
+
+1. 打开浏览器访问 `http://localhost:3000`
+2. 输入用户名和密码
+3. 点击"登录"按钮
+4. 登录成功后自动跳转到仪表盘
+
+### 项目管理
+
+1. 点击左侧菜单"项目管理"
+2. 点击"新建项目"按钮
+3. 填写项目名称和描述
+4. 点击"创建"
+
+### GPU监控
+
+1. 点击左侧菜单"GPU监控"
+2. 查看实时显存使用情况
+3. 监控GPU利用率和温度
+
+### 训练任务
+
+1. 点击左侧菜单"训练任务"
+2. 点击"新建训练任务"
+3. 选择模型、数据集
+4. 配置训练参数
+5. 提交训练
+
+### 推理服务
+
+1. 点击左侧菜单"推理服务"
+2. 选择推理模型
+3. 输入提示词
+4. 点击"生成"
+
+---
+
 ## 📡 API端点
 
-| 模块 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| **认证** | /api/v1/auth/token | POST | 登录获取Token |
-| | /api/v1/auth/me | GET | 获取当前用户 |
-| **项目** | /api/v1/projects | GET | 项目列表 |
-| | /api/v1/projects | POST | 创建项目 |
-| **任务** | /api/v1/tasks | GET | 任务列表 |
-| **数据集** | /api/v1/datasets | GET | 数据集列表 |
-| **模型** | /api/v1/models | GET | 模型列表 |
-| **GPU** | /api/v1/gpu | GET | GPU状态 |
-| **指标** | /api/v1/metrics/loss | GET | Loss曲线 |
-| **训练** | /api/v1/training/models | GET | 训练模型 |
-| | /api/v1/training/submit | POST | 提交训练 |
-| **推理** | /api/v1/inference/models | GET | 推理模型 |
-| | /api/v1/inference/generate | POST | 推理生成 |
-| **设置** | /api/v1/settings/system | GET | 系统设置 |
-| | /api/v1/settings/storage | GET | 存储设置 |
+### 认证模块
 
-### 认证示例
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/auth/token` | POST | 登录获取Token |
+| `/api/v1/auth/me` | GET | 获取当前用户 |
+
+### 核心模块
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/projects` | GET/POST | 项目列表/创建 |
+| `/api/v1/tasks` | GET | 任务列表 |
+| `/api/v1/datasets` | GET | 数据集列表 |
+| `/api/v1/models` | GET | 模型列表 |
+
+### 监控模块
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/gpu` | GET | GPU状态 |
+| `/api/v1/metrics/loss` | GET | Loss曲线 |
+
+### 训练与推理
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/training/models` | GET | 训练模型列表 |
+| `/api/v1/training/submit` | POST | 提交训练任务 |
+| `/api/v1/inference/models` | GET | 推理模型列表 |
+| `/api/v1/inference/generate` POST | 推理生成 |
+
+### 设置
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/settings/system` | GET | 系统配置 |
+| `/api/v1/settings/storage` | GET | 存储配置 |
+
+### API使用示例
 
 ```bash
 # 获取Token
@@ -255,6 +403,8 @@ curl http://localhost:8000/api/v1/projects \
   -H "Authorization: Bearer <your_token>"
 ```
 
+---
+
 ## 🧪 测试
 
 ### 后端测试
@@ -273,6 +423,8 @@ npm run test            # 运行测试
 npm run test -- --coverage  # 带覆盖率
 ```
 
+---
+
 ## 📦 构建部署
 
 ### 前端构建
@@ -282,7 +434,7 @@ cd frontend
 npm run build
 ```
 
-构建产物在 `dist/` 目录，可部署到Nginx、CDN等。
+构建产物在 `dist/` 目录。
 
 ### Docker部署
 
@@ -295,6 +447,31 @@ docker build -t ai-platform-backend ./backend
 docker build -t ai-platform-frontend ./frontend
 ```
 
+### Nginx配置示例
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    # 前端静态文件
+    location / {
+        root /var/www/ai-platform/dist;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # 后端API代理
+    location /api/ {
+        proxy_pass http://localhost:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+---
+
 ## 📚 文档
 
 | 文档 | 说明 |
@@ -304,18 +481,22 @@ docker build -t ai-platform-frontend ./frontend
 | [USER_MANUAL.md](docs/USER_MANUAL.md) | 平台使用指南 |
 | [DEVELOPMENT.md](docs/DEVELOPMENT.md) | 开发规范与指南 |
 | [ROADMAP.md](docs/ROADMAP.md) | 版本规划 |
-| [V1.1_PLAN.md](docs/V1.1_PLAN.md) | v1.1开发规划 |
+| [TEST_REPORT.md](docs/TEST_REPORT.md) | 测试报告 |
+
+---
 
 ## 🎯 v1.1规划
 
-| 优先级 | 功能 | 工期 |
-|--------|------|------|
-| P0 | 数据集版本控制 | 3天 |
-| P0 | 多用户支持 | 5天 |
-| P1 | 数据质量检查 | 3天 |
-| P1 | 权限管理(RBAC) | 4天 |
+| 优先级 | 功能 | 工期 | 状态 |
+|--------|------|------|------|
+| P0 | 数据集版本控制 | 3天 | ✅ 完成 |
+| P0 | 多用户支持 | 5天 | 🔄 进行中 |
+| P1 | 数据质量检查 | 3天 | ✅ 完成 |
+| P1 | 权限管理(RBAC) | 4天 | ⏳ 待开发 |
 
 **v1.1预计上线**: 2026-02-23
+
+---
 
 ## 🤝 贡献
 
@@ -325,22 +506,32 @@ docker build -t ai-platform-frontend ./frontend
 4. 推送到分支 (`git push origin feature/xxx`)
 5. 创建Pull Request
 
+---
+
 ## 📄 许可证
 
-MIT License
+MIT License - 详见 [LICENSE](LICENSE) 文件
+
+---
 
 ## 📅 更新日志
 
 ### v1.0.0 (2026-02-08)
 - ✅ 完成所有核心功能开发
-- ✅ JWT认证系统 (登录/注册/Token)
+- ✅ JWT认证系统
 - ✅ 11个前端页面
 - ✅ 11个后端API模块
 - ✅ GPU实时监控
 - ✅ Loss曲线可视化
-- ✅ 5份项目文档
+- ✅ 6份项目文档
 
 ---
 
+<div align="center">
+
 **维护者**: AI Development Team  
-**项目地址**: [GitHub Repository]
+**项目地址**: https://github.com/hackeshackes/ai-platform
+
+⭐ 如果项目对你有帮助，欢迎Star！
+
+</div>
