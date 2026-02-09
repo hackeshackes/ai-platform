@@ -1,126 +1,148 @@
+# AI Platform v2.0 Docker Compose
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
+  # PostgreSQL数据库
   postgres:
     image: postgres:15-alpine
     container_name: ai-platform-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ai_platform
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER:-aiplatform}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aiplatform123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-aiplatform} -d ai_platform"]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
 
-  # Redis 缓存和消息队列
+  # Redis缓存
   redis:
     image: redis:7-alpine
     container_name: ai-platform-redis
-    ports:
-      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
 
-  # MLflow 实验跟踪
-  mlflow:
-    image: mlflow/mlflow:2.13.0
-    container_name: ai-platform-mlflow
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://postgres:postgres@postgres:5432/ai_platform --default-artifact-root /mlruns
-    ports:
-      - "5000:5000"
-    environment:
-      - MLFLOW_TRACKING_URI=postgresql://postgres:postgres@postgres:5432/ai_platform
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # Ollama 本地推理
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ai-platform-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-
-  # Label Studio 标注平台
-  label-studio:
-    image: heartexlabs/label-studio:latest
-    container_name: ai-platform-labelstudio
-    ports:
-      - "8080:8080"
-    environment:
-      - LABEL_STUDIO_HOST=http://localhost:8080
-      - POSTGRES_DB=label_studio
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=postgres
-    volumes:
-      - labelstudio_data:/label_studio/data
-      - labelstudio_media:/label_studio/media
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  # 后端API
-  backend:
+  # Celery Worker
+  worker:
     build:
       context: .
       dockerfile: Dockerfile.backend
-    container_name: ai-platform-backend
-    ports:
-      - "8000:8000"
+    container_name: ai-platform-worker
+    command: celery -A backend.core.celery_app worker -Q training,inference,data,notification -l info --concurrency=4
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ai_platform
-      - REDIS_URL=redis://redis:6379/0
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - OLLAMA_BASE_URL=http://ollama:11434
+      - DATABASE_URL=postgresql://${DB_USER:-aiplatform}:${DB_PASSWORD:-aiplatform123}@postgres:5432/ai_platform
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/0
+      - CELERY_BROKER=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/2
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-      mlflow:
-        condition: service_started
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
 
-  # 前端 (开发模式用Vite)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile.frontend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #   depends_on:
-  #     - backend
+  # Celery Beat (定时任务)
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ai-platform-beat
+    command: celery -A backend.core.celery_app beat -l info
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-aiplatform}:${DB_PASSWORD:-aiplatform123}@postgres:5432/ai_platform
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
+
+  # API服务
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ai-platform-api
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-aiplatform}:${DB_PASSWORD:-aiplatform123}@postgres:5432/ai_platform
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/0
+      - CELERY_BROKER=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/2
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
+
+  # Flower (Celery监控)
+  flower:
+    image: mher/flower:latest
+    container_name: ai-platform-flower
+    environment:
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD:-redis123}@redis:6379/2
+    ports:
+      - "5555:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
+
+  # 前端
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ai-platform-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - ai-platform-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
-  ollama_data:
-  labelstudio_data:
-  labelstudio_media:
 
 networks:
-  default:
-    name: ai-platform-network
+  ai-platform-network:
+    driver: bridge
