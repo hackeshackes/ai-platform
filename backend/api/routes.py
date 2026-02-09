@@ -54,6 +54,14 @@ router.include_router(permissions.router, prefix="/permissions", tags=["Permissi
 # v2.0 Phase 2: Pipeline编排
 router.include_router(pipeline.router, prefix="/pipelines", tags=["Pipelines"])
 
+# v2.0 Phase 2: CI/CD
+try:
+    from api.endpoints.cicd import deploy
+    router.include_router(deploy.router, prefix="/cicd", tags=["CI/CD"])
+    CICD_ENABLED = True
+except ImportError:
+    CICD_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
