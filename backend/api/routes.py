@@ -135,6 +135,22 @@ try:
 except ImportError:
     NOTEBOOKS_ENABLED = False
 
+# v2.2: LLM Tracing
+try:
+    from api.endpoints import tracing
+    router.include_router(tracing.router, prefix="/tracing", tags=["LLM Tracing"])
+    LLM_TRACING_ENABLED = True
+except ImportError:
+    LLM_TRACING_ENABLED = False
+
+# v2.2: 模型评估
+try:
+    from api.endpoints import evaluation
+    router.include_router(evaluation.router, prefix="/evaluation", tags=["Model Evaluation"])
+    EVALUATION_ENABLED = True
+except ImportError:
+    EVALUATION_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -165,7 +181,9 @@ async def system_info():
             "model_registry": MODEL_REGISTRY_ENABLED,
             "lineage": LINEAGE_ENABLED,
             "quality": QUALITY_ENABLED,
-            "notebooks": NOTEBOOKS_ENABLED
+            "notebooks": NOTEBOOKS_ENABLED,
+            "llm_tracing": LLM_TRACING_ENABLED,
+            "evaluation": EVALUATION_ENABLED
         },
-        "version": "2.1.0-beta"
+        "version": "2.2.0-beta"
     }
