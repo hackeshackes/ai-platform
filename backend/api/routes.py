@@ -151,6 +151,14 @@ try:
 except ImportError:
     EVALUATION_ENABLED = False
 
+# v2.2: 多租户
+try:
+    from api.endpoints import multi_tenant
+    router.include_router(multi_tenant.router, prefix="/tenants", tags=["Multi-Tenant"])
+    MULTI_TENANT_ENABLED = True
+except ImportError:
+    MULTI_TENANT_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -183,7 +191,8 @@ async def system_info():
             "quality": QUALITY_ENABLED,
             "notebooks": NOTEBOOKS_ENABLED,
             "llm_tracing": LLM_TRACING_ENABLED,
-            "evaluation": EVALUATION_ENABLED
+            "evaluation": EVALUATION_ENABLED,
+            "multi_tenant": MULTI_TENANT_ENABLED
         },
         "version": "2.2.0-beta"
     }
