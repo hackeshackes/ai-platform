@@ -207,6 +207,14 @@ try:
 except ImportError:
     RAY_DATA_ENABLED = False
 
+# v2.3: 性能优化
+try:
+    from api.endpoints import optimization
+    router.include_router(optimization.router, prefix="/optimization", tags=["Performance"])
+    OPTIMIZATION_ENABLED = True
+except ImportError:
+    OPTIMIZATION_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -246,7 +254,8 @@ async def system_info():
             "ai_gateway": AI_GATEWAY_ENABLED,
             "ai_assistant": AI_ASSISTANT_ENABLED,
             "judge_builder": JUDGE_BUILDER_ENABLED,
-            "ray_data": RAY_DATA_ENABLED
+            "ray_data": RAY_DATA_ENABLED,
+            "optimization": OPTIMIZATION_ENABLED
         },
         "version": "2.3.0-beta"
     }
