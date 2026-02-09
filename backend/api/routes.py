@@ -87,6 +87,14 @@ try:
 except ImportError:
     RAG_ENABLED = False
 
+# v2.0 Phase 3: Agent编排
+try:
+    from api.endpoints import agents
+    router.include_router(agents.router, prefix="/agents", tags=["Agents"])
+    AGENTS_ENABLED = True
+except ImportError:
+    AGENTS_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
