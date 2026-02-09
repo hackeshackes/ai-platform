@@ -2,9 +2,66 @@
 from fastapi import APIRouter
 
 # 导入所有端点
-from api.endpoints import auth, users, projects, experiments, tasks, datasets, models, health, gpu, metrics, training, inference, settings, versions, quality, permissions, pipeline
+from api.endpoints import auth, users, projects, experiments, tasks, datasets, models, health, gpu, metrics, training, inference, settings, versions, quality, pipeline
+
+# v2.3: 动态导入模块
+import importlib
+import sys
+import os
+
+def load_module(name, filepath):
+    """加载模块"""
+    try:
+        spec = importlib.util.spec_from_file_location(name, filepath)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        return module
+    except Exception as e:
+        print(f"Failed to load {name}: {e}")
+        return None
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+endpoints_dir = os.path.join(backend_dir, 'api', 'endpoints')
+
+gateway_module = load_module('gateway_endpoint', os.path.join(endpoints_dir, 'gateway.py'))
+assistant_module = load_module('assistant_endpoint', os.path.join(endpoints_dir, 'assistant.py'))
+judges_module = load_module('judges_endpoint', os.path.join(endpoints_dir, 'judges.py'))
+ray_module = load_module('ray_endpoint', os.path.join(endpoints_dir, 'ray.py'))
+optimization_module = load_module('optimization_endpoint', os.path.join(endpoints_dir, 'optimization.py'))
 
 router = APIRouter()
+
+# v2.3: 注册路由
+if gateway_module:
+    router.include_router(gateway_module.router, prefix="/gateway", tags=["AI Gateway"])
+    AI_GATEWAY_ENABLED = True
+else:
+    AI_GATEWAY_ENABLED = False
+
+if assistant_module:
+    router.include_router(assistant_module.router, prefix="/assistant", tags=["AI Assistant"])
+    AI_ASSISTANT_ENABLED = True
+else:
+    AI_ASSISTANT_ENABLED = False
+
+if judges_module:
+    router.include_router(judges_module.router, prefix="/judges", tags=["Judge Builder"])
+    JUDGE_BUILDER_ENABLED = True
+else:
+    JUDGE_BUILDER_ENABLED = False
+
+if ray_module:
+    router.include_router(ray_module.router, prefix="/ray", tags=["Ray Data"])
+    RAY_DATA_ENABLED = True
+else:
+    RAY_DATA_ENABLED = False
+
+if optimization_module:
+    router.include_router(optimization_module.router, prefix="/optimization", tags=["Performance"])
+    OPTIMIZATION_ENABLED = True
+else:
+    OPTIMIZATION_ENABLED = False
 
 # 认证
 router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
@@ -47,9 +104,6 @@ router.include_router(versions.router, prefix="/datasets", tags=["Versions"])
 
 # v1.1: 数据质量检查
 router.include_router(quality.router, prefix="/datasets", tags=["Quality"])
-
-# v1.1: 权限管理
-router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])
 
 # v2.0 Phase 2: Pipeline编排
 router.include_router(pipeline.router, prefix="/pipelines", tags=["Pipelines"])

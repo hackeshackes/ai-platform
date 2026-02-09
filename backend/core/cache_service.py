@@ -6,7 +6,20 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from core.cache import cache
 from core.decorators import cached, invalidate_cache, CacheKeys
-from backend.models import Project, Task, Dataset, User, Experiment, Model
+
+# 动态导入models
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    from models import Project, Task, Dataset, User, Experiment, Model
+except ImportError:
+    Project = None
+    Task = None
+    Dataset = None
+    User = None
+    Experiment = None
+    Model = None
 
 class CacheService:
     """缓存服务"""

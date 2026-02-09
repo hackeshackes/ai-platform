@@ -1,10 +1,77 @@
 """
+optimization.py - AI Platform v2.3
+"""
+from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
+from datetime import datetime
+
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'optimization/performance.py')
+
+spec = importlib.util.spec_from_file_location("gateway_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    performance_optimizer = module.performance_optimizer
+except Exception as e:
+    print(f"Failed to import module: {e}")
+    performance_optimizer = None
+
+from api.endpoints.auth import get_current_user
+
+router = APIRouter()
+"""
+optimization.py - AI Platform v2.3
+"""
+from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
+from datetime import datetime
+
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'optimization/performance.py')
+
+spec = importlib.util.spec_from_file_location("optimization_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    performance_optimizer = module.performance_optimizer
+except Exception as e:
+    print(f"Failed to import {module_name} module: {e}")
+    performance_optimizer = None
+
+from api.endpoints.auth import get_current_user
+
+router = APIRouter()
+"""
 性能优化API端点 v2.3
 """
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 
-from backend.optimization.performance import performance_optimizer
+# 动态导入optimization模块
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+    from optimization.performance import performance_optimizer
+except ImportError:
+    performance_optimizer = None
+
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

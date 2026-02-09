@@ -1,15 +1,32 @@
 """
-Judge Builder API端点 v2.3
+judges.py - AI Platform v2.3
 """
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
+from datetime import datetime
 
-from backend.judges.builder import judge_builder
-from backend.core.auth import get_current_user
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'judges/builder.py')
+
+spec = importlib.util.spec_from_file_location("gateway_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    judge_builder = module.judge_builder
+except Exception as e:
+    print(f"Failed to import module: {e}")
+    judge_builder = None
+
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
-
 class CreateJudgeModel(BaseModel):
     name: str
     description: str
@@ -31,6 +48,25 @@ class CreateRunModel(BaseModel):
 class TestJudgeModel(BaseModel):
     judge_id: str
     trace_data: Dict
+
+@router.get("/health")
+async def judge_health():
+    """
+    Judge Builder健康检查
+    
+    v2.3: Judge Builder
+    """
+    judges = list(judge_builder.judges.values())
+    runs = list(judge_builder.runs.values())
+    
+    return {
+        "status": "healthy",
+        "judges_count": len(judges),
+        "runs_count": len(runs),
+        "builtin_judges": len([j for j in judges if j.created_by == "system"])
+    }
+
+@router.get("")
 
 @router.get("")
 async def list_judges(
@@ -294,19 +330,3 @@ async def test_judge(request: TestJudgeModel):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/health")
-async def judge_health():
-    """
-    Judge Builder健康检查
-    
-    v2.3: Judge Builder
-    """
-    judges = list(judge_builder.judges.values())
-    runs = list(judge_builder.runs.values())
-    
-    return {
-        "status": "healthy",
-        "judges_count": len(judges),
-        "runs_count": len(runs),
-        "builtin_judges": len([j for j in judges if j.created_by == "system"])
-    }

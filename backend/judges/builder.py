@@ -16,8 +16,8 @@ class Judge:
     prompt: str
     instructions: str
     judge_type: str  # llm, rule-based
-    criteria: List[Dict] = field(default_factory=list)
     created_by: str
+    criteria: List[Dict] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
 

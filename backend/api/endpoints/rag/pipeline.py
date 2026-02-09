@@ -1,13 +1,17 @@
 """
 RAG API端点 v2.0 Phase 3
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.rag.pipeline import rag_pipeline, RAGConfig, RetrieverType, RerankerType
-from backend.core.auth import get_current_user
+from rag.pipeline import rag_pipeline, RAGConfig, RetrieverType, RerankerType
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

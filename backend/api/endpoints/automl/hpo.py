@@ -1,14 +1,18 @@
 """
 AutoML API端点 v2.0 Phase 3
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
 
-from backend.automl.hpo import hpo_optimizer, HPOMethod, HPOParam
-from backend.core.auth import get_current_user
+from automl.hpo import hpo_optimizer, HPOMethod, HPOParam
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

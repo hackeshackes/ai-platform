@@ -9,14 +9,14 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 from api.routes import router
-from core.config import settings
+from core.config import settings as config_settings
 from core.logging import logger
 
 # 创建FastAPI应用
 app = FastAPI(
     title="AI Platform API",
     description="大模型全生命周期管理平台 API",
-    version="1.0.0",
+    version="2.3.0-beta",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -24,7 +24,7 @@ app = FastAPI(
 # CORS配置
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=config_settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,8 +37,8 @@ app.include_router(router, prefix="/api/v1")
 @app.get("/api/v1")
 async def api_root():
     return {
-        "message": "AI Platform API v1",
-        "version": "1.0.0",
+        "message": "AI Platform API v2.3",
+        "version": "2.3.0-beta",
         "endpoints": {
             "auth": "/api/v1/auth",
             "users": "/api/v1/users",
@@ -47,7 +47,12 @@ async def api_root():
             "tasks": "/api/v1/tasks",
             "datasets": "/api/v1/datasets",
             "models": "/api/v1/models",
-            "health": "/api/v1/health"
+            "health": "/api/v1/health",
+            "gateway": "/api/v1/gateway",
+            "assistant": "/api/v1/assistant",
+            "judges": "/api/v1/judges",
+            "ray": "/api/v1/ray",
+            "optimization": "/api/v1/optimization"
         },
         "documentation": "/docs"
     }
@@ -57,7 +62,7 @@ async def api_root():
 async def root():
     return {
         "message": "AI Platform API",
-        "version": "1.0.0",
+        "version": "2.3.0-beta",
         "docs": "/docs"
     }
 

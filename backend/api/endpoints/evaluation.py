@@ -1,12 +1,16 @@
 """
 模型评估API端点 v2.2
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict, Any, Callable
 from pydantic import BaseModel
 
-from backend.llm.evaluation import evaluator
-from backend.core.auth import get_current_user
+from llm.evaluation import evaluator
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

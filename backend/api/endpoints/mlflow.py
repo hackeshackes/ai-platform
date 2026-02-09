@@ -1,4 +1,8 @@
 """MLflow integration endpoints"""
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List

@@ -1,16 +1,34 @@
 """
-AI Gateway API端点 v2.3
+gateway.py - AI Platform v2.3
 """
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.gateway.gateway import ai_gateway, ProviderType
-from backend.core.auth import get_current_user
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'gateway/gateway.py')
+
+spec = importlib.util.spec_from_file_location("gateway_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    ai_gateway = module.ai_gateway
+    ProviderType = module.ProviderType
+except Exception as e:
+    print(f"Failed to import module: {e}")
+    ai_gateway = None
+    ProviderType = None
+
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
-
 class RegisterProviderModel(BaseModel):
     name: str
     provider_type: str  # openai, anthropic, local, azure

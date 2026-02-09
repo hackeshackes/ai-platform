@@ -6,8 +6,14 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.lineage.graph import lineage_graph
-from api.endpoints.auth import get_current_user
+from lineage.graph import lineage_graph
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+    from api.endpoints.auth import get_current_user
+except ImportError:
+    get_current_user = None
 
 router = APIRouter()
 

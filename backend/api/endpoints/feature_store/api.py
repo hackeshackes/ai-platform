@@ -6,10 +6,16 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.feature_store.store import feature_store
-from backend.feature_store.ingestion import ingestion_service
-from backend.feature_store.serving import serving_service
-from api.endpoints.auth import get_current_user
+from feature_store.store import feature_store
+from feature_store.ingestion import ingestion_service
+from feature_store.serving import serving_service
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+    from api.endpoints.auth import get_current_user
+except ImportError:
+    get_current_user = None
 
 router = APIRouter()
 

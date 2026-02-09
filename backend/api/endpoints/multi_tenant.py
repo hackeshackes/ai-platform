@@ -1,12 +1,16 @@
 """
 多租户API端点 v2.2
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
-from backend.multi_tenant.manager import tenant_manager
-from backend.core.auth import get_current_user
+from multi_tenant.manager import tenant_manager
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

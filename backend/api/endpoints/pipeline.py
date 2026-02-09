@@ -7,9 +7,23 @@ from pydantic import BaseModel
 from datetime import datetime
 from uuid import uuid4
 
-from backend.pipeline.dag import pipeline_engine, PipelineStatus
-from backend.pipeline.templates.defaults import get_template, list_templates
-from backend.core.auth import get_current_user
+# 动态导入pipeline模块
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+    from pipeline.dag import pipeline_engine, PipelineStatus
+    from pipeline.templates.defaults import get_template, list_templates
+except ImportError:
+    pipeline_engine = None
+    PipelineStatus = None
+    get_template = None
+    list_templates = None
+
+try:
+    from api.endpoints.auth import get_current_user
+except ImportError:
+    get_current_user = None
 
 router = APIRouter()
 

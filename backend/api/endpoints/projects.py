@@ -9,7 +9,13 @@ import uuid
 
 # v2.0 导入
 from core.cache_service import cache_service
-from core.auth import get_current_user
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+    from api.endpoints.auth import get_current_user
+except ImportError:
+    get_current_user = None
 
 router = APIRouter()
 

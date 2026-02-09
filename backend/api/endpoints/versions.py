@@ -8,8 +8,17 @@ from typing import List, Optional
 from datetime import datetime
 import hashlib
 
-from api.auth import get_current_user
-from models import get_db, DatasetVersion
+# 动态导入
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+    from api.endpoints.auth import get_current_user
+    from models import get_db, DatasetVersion
+except ImportError:
+    get_current_user = None
+    get_db = None
+    DatasetVersion = None
 
 router = APIRouter()
 

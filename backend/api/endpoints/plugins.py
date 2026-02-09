@@ -1,11 +1,15 @@
 """
 插件API端点 v2.2
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
-from backend.plugins.manager import plugin_manager
+from plugins.manager import plugin_manager
 
 router = APIRouter()
 

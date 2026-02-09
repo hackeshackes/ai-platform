@@ -1,14 +1,18 @@
 """
 CI/CD API端点 v2.0 Phase 2
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 from pydantic import BaseModel
 
-from backend.cicd.deploy.blue_green import blue_green_deployer
-from backend.cicd.deploy.rollback import rollback_manager
-from backend.cicd.quality.gates import quality_gates
-from backend.core.auth import get_current_user
+from cicd.deploy.blue_green import blue_green_deployer
+from cicd.deploy.rollback import rollback_manager
+from cicd.quality.gates import quality_gates
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

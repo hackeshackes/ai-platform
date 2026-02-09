@@ -136,6 +136,10 @@ class AIGateway:
             providers = [p for p in providers if p.enabled == enabled]
         return sorted(providers, key=lambda p: p.priority)
     
+    def list_routes(self) -> List[Route]:
+        """列出路由"""
+        return list(self.routes.values())
+    
     def update_provider(self, provider_id: str, **kwargs) -> bool:
         """更新提供商"""
         provider = self.providers.get(provider_id)

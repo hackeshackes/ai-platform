@@ -1,14 +1,32 @@
 """
-Ray Data API端点 v2.3
+ray.py - AI Platform v2.3
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
+from datetime import datetime
 
-from backend.ray.manager import ray_manager
+# 直接导入模块
+import importlib.util
+import sys
+import os
+
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+module_path = os.path.join(backend_dir, 'ray/manager.py')
+
+spec = importlib.util.spec_from_file_location("gateway_module", module_path)
+module = importlib.util.module_from_spec(spec)
+
+try:
+    spec.loader.exec_module(module)
+    ray_manager = module.ray_manager
+except Exception as e:
+    print(f"Failed to import module: {e}")
+    ray_manager = None
+
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
-
 class CreateClusterModel(BaseModel):
     name: str
     head_node: str

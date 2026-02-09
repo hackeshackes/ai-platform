@@ -95,10 +95,10 @@ class AgentFramework:
             name="读取文件",
             description="读取文件内容",
             type="shell",
-            parameters={"": "string"}}
+            parameters={"path": {"type": "string"}}
         )
         
-path": {"type        self.tool_registry["file_write"] = Tool(
+        self.tool_registry["file_write"] = Tool(
             tool_id="file_write",
             name="写入文件",
             description="写入文件内容",

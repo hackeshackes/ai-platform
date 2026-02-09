@@ -3,7 +3,16 @@
 """
 import os
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+# 应用设置
+class Settings:
+    """应用设置"""
+    CORS_ORIGINS: List[str] = ["*"]
+    SITE_NAME: str = "AI Platform"
+    VERSION: str = "2.3.0-beta"
+
+settings = Settings()
 
 class DatabaseConfig(BaseModel):
     """数据库配置"""

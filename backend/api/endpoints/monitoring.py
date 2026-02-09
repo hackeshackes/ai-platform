@@ -1,15 +1,19 @@
 """
 监控告警API端点 v2.0 Phase 2
 """
+
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
 
-from backend.monitoring.monitor import alert_manager, AlertSeverity, AlertStatus
-from backend.pipeline.data.pipeline import data_pipeline
-from backend.core.auth import get_current_user
+from monitoring.monitor import alert_manager, AlertSeverity, AlertStatus
+from pipeline.data.pipeline import data_pipeline
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 
@@ -39,7 +43,7 @@ async def create_alert_rule(rule: AlertRuleCreate, current_user = Depends(get_cu
     
     v2.0 Phase 2: 监控告警
     """
-    from backend.monitoring.monitor import AlertRule
+    from monitoring.monitor import AlertRule
     
     try:
         severity = AlertSeverity(rule.severity)
@@ -198,7 +202,7 @@ async def run_pipeline(request: RunPipelineRequest, current_user = Depends(get_c
     
     v2.0 Phase 2: 数据流水线
     """
-    from backend.pipeline.data.pipeline import DataStep
+    from pipeline.data.pipeline import DataStep
     
     steps = [DataStep(s) for s in request.steps]
     
