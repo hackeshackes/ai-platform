@@ -63,6 +63,14 @@ try:
 except ImportError:
     CICD_ENABLED = False
 
+# v2.0 Phase 2: 监控告警
+try:
+    from api.endpoints import monitoring
+    router.include_router(monitoring.router, prefix="/monitoring", tags=["Monitoring"])
+    MONITORING_ENABLED = True
+except ImportError:
+    MONITORING_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
