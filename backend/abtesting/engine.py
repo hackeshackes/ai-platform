@@ -29,14 +29,14 @@ class Experiment:
     name: str
     description: str
     status: ExperimentStatus
+    created_by: str
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    updated_at: datetime = field(default_factory=datetime.utcnow)
     variants: List[Dict] = field(default_factory=list)
     traffic_allocation: TrafficAllocation = TrafficAllocation.EVEN
     target_metrics: List[str] = field(default_factory=list)
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    created_by: str
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    updated_at: datetime = field(default_factory=datetime.utcnow)
 
 @dataclass
 class ExperimentResult:

@@ -3,6 +3,7 @@ A/B Testing API端点 v2.4
 """
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
 
 # 直接导入模块
 import importlib.util
@@ -24,6 +25,24 @@ except Exception as e:
     ExperimentStatus = None
 
 router = APIRouter()
+
+class CreateExperimentModel(BaseModel):
+    name: str
+    description: str
+    variants: List[Dict]
+    target_metrics: Optional[List[str]] = None
+
+class AssignVariantModel(BaseModel):
+    user_id: str
+
+class TrackConversionModel(BaseModel):
+    user_id: str
+    value: float = 1.0
+
+class TrackEventModel(BaseModel):
+    user_id: str
+    event_name: str
+    event_value: float = 0.0
 
 @router.get("/experiments")
 async def list_experiments(status: Optional[str] = None):
@@ -48,18 +67,13 @@ async def list_experiments(status: Optional[str] = None):
     }
 
 @router.post("/experiments")
-async def create_experiment(
-    name: str,
-    description: str,
-    variants: List[Dict],
-    target_metrics: Optional[List[str]] = None
-):
+async def create_experiment(request: CreateExperimentModel):
     """创建实验"""
     experiment = ab_testing_engine.create_experiment(
-        name=name,
-        description=description,
-        variants=variants,
-        target_metrics=target_metrics
+        name=request.name,
+        description=request.description,
+        variants=request.variants,
+        target_metrics=request.target_metrics
     )
     
     return {
@@ -119,9 +133,9 @@ async def delete_experiment(experiment_id: str):
     return {"message": "Experiment deleted"}
 
 @router.post("/experiments/{experiment_id}/assign")
-async def assign_variant(experiment_id: str, user_id: str):
+async def assign_variant(experiment_id: str, request: AssignVariantModel):
     """分配变体"""
-    variant_id = ab_testing_engine.assign_variant(experiment_id, user_id)
+    variant_id = ab_testing_engine.assign_variant(experiment_id, request.user_id)
     if not variant_id:
         raise HTTPException(status_code=400, detail="Cannot assign variant")
     return {"variant_id": variant_id}
@@ -151,22 +165,17 @@ async def get_leaderboard(experiment_id: str):
     return {"leaderboard": leaderboard}
 
 @router.post("/track/conversion")
-async def track_conversion(experiment_id: str, user_id: str, value: float = 1.0):
+async def track_conversion(experiment_id: str, request: TrackConversionModel):
     """跟踪转化"""
-    result = ab_testing_engine.track_conversion(experiment_id, user_id, value)
+    result = ab_testing_engine.track_conversion(experiment_id, request.user_id, request.value)
     if not result:
         raise HTTPException(status_code=400, detail="Failed to track conversion")
     return {"message": "Conversion tracked"}
 
 @router.post("/track/event")
-async def track_event(
-    experiment_id: str,
-    user_id: str,
-    event_name: str,
-    event_value: float = 0.0
-):
+async def track_event(experiment_id: str, request: TrackEventModel):
     """跟踪事件"""
-    result = ab_testing_engine.track_event(experiment_id, user_id, event_name, event_value)
+    result = ab_testing_engine.track_event(experiment_id, request.user_id, request.event_name, request.event_value)
     return {"message": "Event tracked"}
 
 @router.get("/summary")

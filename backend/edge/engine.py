@@ -3,7 +3,7 @@ Edge Inference 模块 v2.4
 ONNX导出和边缘部署
 """
 from typing import Dict, List, Optional, Any
-from dataclass import dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from uuid import uuid4

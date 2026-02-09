@@ -3,6 +3,7 @@ Edge Inference API端点 v2.4
 """
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
 
 # 直接导入模块
 import importlib.util
@@ -27,21 +28,49 @@ except Exception as e:
 
 router = APIRouter()
 
+class RegisterModelModel(BaseModel):
+    model_id: str
+    model_path: str
+    model_type: str = "pytorch"
+    metadata: Optional[Dict] = None
+
+class ExportConfigModel(BaseModel):
+    model_id: str
+    model_version: str
+    export_format: str
+    target_device: str
+    optimization_level: int = 1
+    quantize: bool = False
+    input_shape: Optional[List[int]] = None
+
+class QuickExportModel(BaseModel):
+    model_id: str
+    export_format: str = "onnx"
+    quantize: bool = True
+
+class CompatibilityModel(BaseModel):
+    model_id: str
+    export_format: str
+    device: str
+
+class CreateDeploymentModel(BaseModel):
+    name: str
+    model_id: str
+    export_config_id: str
+    device_type: str
+    device_url: str
+    config: Optional[Dict] = None
+
 # ==================== 模型注册 ====================
 
 @router.post("/models/register")
-async def register_model(
-    model_id: str,
-    model_path: str,
-    model_type: str = "pytorch",
-    metadata: Optional[Dict] = None
-):
+async def register_model(request: RegisterModelModel):
     """注册模型"""
     model = edge_inference_engine.register_model(
-        model_id=model_id,
-        model_path=model_path,
-        model_type=model_type,
-        metadata=metadata
+        model_id=request.model_id,
+        model_path=request.model_path,
+        model_type=request.model_type,
+        metadata=request.metadata
     )
     return {
         "model_id": model["model_id"],
@@ -59,30 +88,22 @@ async def get_registered_model(model_id: str):
 # ==================== 导出配置 ====================
 
 @router.post("/export/config")
-async def create_export_config(
-    model_id: str,
-    model_version: str,
-    export_format: str,
-    target_device: str,
-    optimization_level: int = 1,
-    quantize: bool = False,
-    input_shape: Optional[List[int]] = None
-):
+async def create_export_config(request: ExportConfigModel):
     """创建导出配置"""
     try:
-        fmt = ExportFormat(export_format)
-        device = DeviceType(target_device)
+        fmt = ExportFormat(request.export_format)
+        device = DeviceType(request.target_device)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
     config = edge_inference_engine.create_export_config(
-        model_id=model_id,
-        model_version=model_version,
+        model_id=request.model_id,
+        model_version=request.model_version,
         export_format=fmt,
         target_device=device,
-        optimization_level=optimization_level,
-        quantize=quantize,
-        input_shape=input_shape
+        optimization_level=request.optimization_level,
+        quantize=request.quantize,
+        input_shape=request.input_shape
     )
     
     return {
@@ -102,64 +123,49 @@ async def export_model(config_id: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/export/quick")
-async def quick_export(
-    model_id: str,
-    export_format: str = "onnx",
-    quantize: bool = True
-):
+async def quick_export(request: QuickExportModel):
     """快速导出"""
     try:
-        fmt = ExportFormat(export_format)
+        fmt = ExportFormat(request.export_format)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid format: {export_format}")
+        raise HTTPException(status_code=400, detail=f"Invalid format: {request.export_format}")
     
     result = edge_inference_engine.quick_export(
-        model_id=model_id,
+        model_id=request.model_id,
         format=fmt,
-        quantize=quantize
+        quantize=request.quantize
     )
     return result
 
 @router.get("/export/compatibility")
-async def check_compatibility(
-    model_id: str,
-    export_format: str,
-    device: str
-):
+async def check_compatibility(request: CompatibilityModel):
     """检查兼容性"""
     try:
-        fmt = ExportFormat(export_format)
-        dev = DeviceType(device)
+        fmt = ExportFormat(request.export_format)
+        dev = DeviceType(request.device)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-    result = edge_inference_engine.check_compatibility(model_id, fmt, dev)
+    result = edge_inference_engine.check_compatibility(request.model_id, fmt, dev)
     return result
 
 # ==================== 边缘部署 ====================
 
 @router.post("/deployments")
-async def create_deployment(
-    name: str,
-    model_id: str,
-    export_config_id: str,
-    device_type: str,
-    device_url: str,
-    config: Optional[Dict] = None
-):
+async def create_deployment(request: CreateDeploymentModel):
     """创建部署"""
     try:
-        device = DeviceType(device_type)
+        device = DeviceType(request.device_type)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid device: {device_type}")
+        raise HTTPException(status_code=400, detail=f"Invalid device: {request.device_type}")
     
     deployment = edge_inference_engine.create_deployment(
-        name=name,
-        model_id=model_id,
-        export_config_id=export_config_id,
+        name=request.name,
+        model_id=request.model_id,
+        export_config_id=request.export_config_id,
         device_type=device,
-        device_url=device_url,
-        config=config
+        device_url=request.device_url,
+        config=request.config
     )
     
     return {
