@@ -183,6 +183,14 @@ try:
 except ImportError:
     AI_GATEWAY_ENABLED = False
 
+# v2.3: AI Assistant
+try:
+    from api.endpoints import assistant
+    router.include_router(assistant.router, prefix="/assistant", tags=["AI Assistant"])
+    AI_ASSISTANT_ENABLED = True
+except ImportError:
+    AI_ASSISTANT_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -219,7 +227,8 @@ async def system_info():
             "multi_tenant": MULTI_TENANT_ENABLED,
             "distributed": DISTRIBUTED_ENABLED,
             "plugins": PLUGINS_ENABLED,
-            "ai_gateway": AI_GATEWAY_ENABLED
+            "ai_gateway": AI_GATEWAY_ENABLED,
+            "ai_assistant": AI_ASSISTANT_ENABLED
         },
         "version": "2.3.0-beta"
     }
