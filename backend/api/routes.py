@@ -333,6 +333,30 @@ try:
 except ImportError:
     COLLABORATION_ENABLED = False
 
+# v2.4: CLI
+try:
+    from api.endpoints import cli
+    router.include_router(cli.router, prefix="/cli", tags=["CLI"])
+    CLI_ENABLED = True
+except ImportError:
+    CLI_ENABLED = False
+
+# v2.4: Cloud Integration
+try:
+    from api.endpoints import cloud
+    router.include_router(cloud.router, prefix="/cloud", tags=["Cloud"])
+    CLOUD_INTEGRATION_ENABLED = True
+except ImportError:
+    CLOUD_INTEGRATION_ENABLED = False
+
+# v2.4: Plugin Marketplace
+try:
+    from api.endpoints import plugins
+    router.include_router(plugins.router, prefix="/plugins", tags=["Plugins"])
+    PLUGIN_MARKETPLACE_ENABLED = True
+except ImportError:
+    PLUGIN_MARKETPLACE_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -381,7 +405,10 @@ async def system_info():
             "ab_testing": AB_TESTING_ENABLED,
             "edge_inference": EDGE_INFERENCE_ENABLED,
             "visualization": VISUALIZATION_ENABLED,
-            "collaboration": COLLABORATION_ENABLED
+            "collaboration": COLLABORATION_ENABLED,
+            "cli": CLI_ENABLED,
+            "cloud_integration": CLOUD_INTEGRATION_ENABLED,
+            "plugin_marketplace": PLUGIN_MARKETPLACE_ENABLED
         },
         "version": "2.4.0-beta"
     }

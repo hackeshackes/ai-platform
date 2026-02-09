@@ -1,1 +1,1 @@
-# 插件模块
+"""Plugin Marketplace模块 v2.4"""
