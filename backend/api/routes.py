@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 
 # 导入所有端点
-from api.endpoints import auth, users, projects, experiments, tasks, datasets, models, health, gpu, metrics, training, inference, settings, versions, quality, permissions
+from api.endpoints import auth, users, projects, experiments, tasks, datasets, models, health, gpu, metrics, training, inference, settings, versions, quality, permissions, pipeline
 
 router = APIRouter()
 
@@ -51,6 +51,9 @@ router.include_router(quality.router, prefix="/datasets", tags=["Quality"])
 # v1.1: 权限管理
 router.include_router(permissions.router, prefix="/permissions", tags=["Permissions"])
 
+# v2.0 Phase 2: Pipeline编排
+router.include_router(pipeline.router, prefix="/pipelines", tags=["Pipelines"])
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -72,7 +75,8 @@ async def system_info():
         "services": {
             "backend": "running",
             "database": "postgresql",
-            "cache": "redis"
+            "cache": "redis",
+            "pipeline": "v2.0"
         },
-        "version": "1.0.0"
+        "version": "2.0.0-beta"
     }

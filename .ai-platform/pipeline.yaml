@@ -1,0 +1,143 @@
+# AI Platform CI/CD Pipeline配置
+# v2.0 Phase 2
+
+name: ai-platform-ci
+trigger:
+  branches:
+    - main
+    - develop
+  paths:
+    - backend/**
+    - frontend/**
+    - Dockerfile*
+    - docker-compose.yml
+
+variables:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ai-platform
+  DOCKER_BUILDKIT: 1
+
+stages:
+  - name: lint
+    display_name: "代码检查"
+    type: quality
+    timeout: 10m
+    commands:
+      - ruff check backend/
+      - ruff check tests/
+      - mypy backend/ --ignore-missing-imports
+    artifacts:
+      reports:
+        coverage: coverage.xml
+
+  - name: test
+    display_name: "单元测试"
+    type: testing
+    depends_on: lint
+    timeout: 30m
+    commands:
+      - pytest tests/ -v --cov=backend --cov-report=xml
+    artifacts:
+      reports:
+        junit: test-results.xml
+        coverage: coverage.xml
+
+  - name: build-backend
+    display_name: "构建后端"
+    type: building
+    depends_on: test
+    timeout: 20m
+    commands:
+      - docker build -t $IMAGE_NAME:backend -f Dockerfile.backend .
+    docker:
+      image: docker:20.10
+      privileged: true
+
+  - name: build-frontend
+    display_name: "构建前端"
+    type: building
+    depends_on: test
+    timeout: 20m
+    commands:
+      - docker build -t $IMAGE_NAME:frontend -f Dockerfilefrontend .
+    docker:
+      image: node:20
+
+  - name: security-scan
+    display_name: "安全扫描"
+    type: security
+    depends_on: build-backend
+    timeout: 15m
+    commands:
+      - trivy image $IMAGE_NAME:backend --exit-code 1 --severity HIGH,CRITICAL
+    allow_failure: false
+
+  - name: push
+    display_name: "推送镜像"
+    type: publishing
+    depends_on: security-scan
+    timeout: 10m
+    commands:
+      - docker tag $IMAGE_NAME:backend $DOCKER_REGISTRY/$IMAGE_NAME:backend:$CI_COMMIT_SHA
+      - docker push $DOCKER_REGISTRY/$IMAGE_NAME:backend:$CI_COMMIT_SHA
+    environment: production
+    when: branch == main
+
+  - name: deploy-staging
+    display_name: "部署Staging"
+    type: deployment
+    depends_on: push
+    timeout: 15m
+    commands:
+      - kubectl set image deployment/api ai-platform=$DOCKER_REGISTRY/$IMAGE_NAME:backend:$CI_COMMIT_SHA -n ai-platform
+    environment: staging
+    when: branch == main
+
+  - name: e2e-test
+    display_name: "端到端测试"
+    type: testing
+    depends_on: deploy-staging
+    timeout: 30m
+    commands:
+      - pytest tests/e2e/ -v
+    environment: staging
+
+  - name: deploy-production
+    display_name: "部署Production"
+    type: deployment
+    depends_on: e2e-test
+    timeout: 15m
+    commands:
+      - kubectl set image deployment/api ai-platform=$DOCKER_REGISTRY/$IMAGE_NAME:backend:$CI_COMMIT_SHA -n ai-platform
+    environment: production
+    when: branch == main
+    approval:
+      required: true
+      timeout: 24h
+
+quality_gates:
+  - name: test-coverage
+    metric: coverage
+    threshold: 80
+    action: fail
+
+  - name: lint-issues
+    metric: issues
+    threshold: 0
+    action: fail
+
+  - name: security-issues
+    metric: vulnerabilities
+    threshold: 0
+    action: warn
+
+notifications:
+  slack:
+    channel: "#ai-platform"
+    on_success: always
+    on_failure: always
+  
+  email:
+    recipients:
+      - team@ai-platform.com
+    on_failure: always
