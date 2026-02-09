@@ -56,8 +56,9 @@ router.include_router(pipeline.router, prefix="/pipelines", tags=["Pipelines"])
 
 # v2.0 Phase 2: CI/CD
 try:
-    from api.endpoints.cicd import deploy
+    from api.endpoints.cicd import deploy, distributed
     router.include_router(deploy.router, prefix="/cicd", tags=["CI/CD"])
+    router.include_router(distributed.router, prefix="/cluster", tags=["Cluster"])
     CICD_ENABLED = True
 except ImportError:
     CICD_ENABLED = False
