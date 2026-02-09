@@ -119,6 +119,14 @@ try:
 except ImportError:
     LINEAGE_ENABLED = False
 
+# v2.1: 数据质量
+try:
+    from api.endpoints import quality
+    router.include_router(quality.router, prefix="/quality", tags=["Data Quality"])
+    QUALITY_ENABLED = True
+except ImportError:
+    QUALITY_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -147,7 +155,8 @@ async def system_info():
             "agents": AGENTS_ENABLED,
             "feature_store": FEATURE_STORE_ENABLED,
             "model_registry": MODEL_REGISTRY_ENABLED,
-            "lineage": LINEAGE_ENABLED
+            "lineage": LINEAGE_ENABLED,
+            "quality": QUALITY_ENABLED
         },
         "version": "2.1.0-beta"
     }
