@@ -199,6 +199,14 @@ try:
 except ImportError:
     JUDGE_BUILDER_ENABLED = False
 
+# v2.3: Ray Data
+try:
+    from api.endpoints import ray
+    router.include_router(ray.router, prefix="/ray", tags=["Ray Data"])
+    RAY_DATA_ENABLED = True
+except ImportError:
+    RAY_DATA_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -237,7 +245,8 @@ async def system_info():
             "plugins": PLUGINS_ENABLED,
             "ai_gateway": AI_GATEWAY_ENABLED,
             "ai_assistant": AI_ASSISTANT_ENABLED,
-            "judge_builder": JUDGE_BUILDER_ENABLED
+            "judge_builder": JUDGE_BUILDER_ENABLED,
+            "ray_data": RAY_DATA_ENABLED
         },
         "version": "2.3.0-beta"
     }
