@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from backend.quality.engine import quality_engine
-from backend.core.auth import get_current_user
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 

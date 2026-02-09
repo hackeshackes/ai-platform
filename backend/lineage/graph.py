@@ -69,7 +69,7 @@ class LineageGraph:
         self,
         node_type: str,
         external_id: str
-    ) -> Optional[LineageNode]]:
+    ) -> Optional[LineageNode]:
         """根据外部ID获取节点"""
         key = (node_type, external_id)
         node_id = self.node_index.get(key)

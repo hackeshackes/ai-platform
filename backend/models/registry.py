@@ -88,11 +88,11 @@ class ModelRegistry:
         self.registered_models[model_id] = model
         return model
     
-    async def get_registered_model(self, model_id: str) -> Optional[RegisteredModel]]:
+    async def get_registered_model(self, model_id: str) -> Optional[RegisteredModel]:
         """获取注册模型"""
         return self.registered_models.get(model_id)
     
-    async def get_registered_model_by_name(self, name: str) -> Optional[RegisteredModel]]:
+    async def get_registered_model_by_name(self, name: str) -> Optional[RegisteredModel]:
         """根据名称获取注册模型"""
         for model in self.registered_models.values():
             if model.name == name:

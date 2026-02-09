@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from core.cache import cache
 from core.decorators import cached, invalidate_cache, CacheKeys
-from models import Project, Task, Dataset
+from backend.models import Project, Task, Dataset, User, Experiment, Model
 
 class CacheService:
     """缓存服务"""

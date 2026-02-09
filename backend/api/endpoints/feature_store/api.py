@@ -9,7 +9,7 @@ from datetime import datetime
 from backend.feature_store.store import feature_store
 from backend.feature_store.ingestion import ingestion_service
 from backend.feature_store.serving import serving_service
-from backend.core.auth import get_current_user
+from api.endpoints.auth import get_current_user
 
 router = APIRouter()
 
