@@ -2,7 +2,7 @@
 
 **版本：** V1.1  
 **日期：** 2026-02-08  
-**基于：** 团队讨论纪要（MLEngineer, MarketTrendAgent, CrawlerAgent）  
+**基于：** 团队讨论纪要（MLEngineer, CrawlerAgent）  
 **状态：** 评审通过
 
 ---
