@@ -375,6 +375,33 @@ except ImportError as e:
     print(f"Providers module not available: {e}")
     PROVIDERS_ENABLED = False
 
+# v3: Enhanced RAG
+try:
+    from api.endpoints.rag_enhanced import router as rag_enhanced_router
+    router.include_router(rag_enhanced_router, prefix="/rag", tags=["RAG Enhanced"])
+    RAG_ENHANCED_ENABLED = True
+except ImportError as e:
+    print(f"RAG Enhanced module not available: {e}")
+    RAG_ENHANCED_ENABLED = False
+
+# v3: Agents Framework
+try:
+    from agents.api.fastapi_endpoints import create_agent_router
+    router.include_router(create_agent_router(), prefix="/agents", tags=["Agents"])
+    AGENTS_ENABLED = True
+except ImportError as e:
+    print(f"Agents module not available: {e}")
+    AGENTS_ENABLED = False
+
+# v3: Dataset Generation
+try:
+    from api.endpoints.dataset_gen import router as dataset_gen_router
+    router.include_router(dataset_gen_router, prefix="/datasets", tags=["Dataset Generation"])
+    DATASET_GEN_ENABLED = True
+except ImportError as e:
+    print(f"Dataset Generation module not available: {e}")
+    DATASET_GEN_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
