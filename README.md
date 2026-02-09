@@ -535,3 +535,37 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 ⭐ 如果项目对你有帮助，欢迎Star！
 
 </div>
+
+---
+
+## 🚀 v2.0 开发中
+
+### Phase 1: 生产化基础 (进行中)
+
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| PostgreSQL升级 | 🔄 进行中 | Schema设计完成，迁移中 |
+| Redis缓存 | 🔄 进行中 | CacheManager已创建 |
+| Celery任务队列 | ✅ 完成 | 4种任务类型已定义 |
+| Alembic迁移 | 🔄 进行中 | 迁移配置已完成 |
+
+### v2.0 技术升级
+
+| 组件 | 当前 | v2.0升级 |
+|------|------|----------|
+| 数据库 | SQLite | PostgreSQL 15 |
+| 缓存 | 无 | Redis 7 |
+| 任务队列 | 同步 | Celery 5 |
+| ORM | SQLAlchemy | SQLAlchemy 2.x + Alembic |
+
+### v2.0 资源
+
+- [v2.0规划](docs/V2.0_PLAN.md)
+- [v2.0详细设计](docs/V2.0_DETAILED_DESIGN.md)
+- [PostgreSQL Schema](docs/SCHEMA.md)
+
+---
+
+**维护者**: AI Development Team  
+**项目地址**: https://github.com/hackeshackes/ai-platform  
+**v2.0开发分支**: main
