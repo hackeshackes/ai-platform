@@ -95,6 +95,14 @@ try:
 except ImportError:
     AGENTS_ENABLED = False
 
+# v2.1: Feature Store
+try:
+    from api.endpoints.feature_store import api as feature_store_api
+    router.include_router(feature_store_api.router, prefix="/feature-store", tags=["Feature Store"])
+    FEATURE_STORE_ENABLED = True
+except ImportError:
+    FEATURE_STORE_ENABLED = False
+
 # ML集成 - 使用条件导入，Docker环境自动启用
 try:
     from api.endpoints import mlflow, ollama
@@ -119,7 +127,9 @@ async def system_info():
             "cache": "redis",
             "pipeline": "v2.0",
             "automl": AUTOML_ENABLED,
-            "rag": RAG_ENABLED
+            "rag": RAG_ENABLED,
+            "agents": AGENTS_ENABLED,
+            "feature_store": FEATURE_STORE_ENABLED
         },
-        "version": "2.0.0-beta"
+        "version": "2.1.0-beta"
     }
