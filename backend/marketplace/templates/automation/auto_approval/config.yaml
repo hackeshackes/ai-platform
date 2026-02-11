@@ -1,0 +1,50 @@
+# 自动审批流程配置
+name: "自动审批流程"
+version: "1.0.0"
+description: "基于规则的智能审批系统，支持多级审批和自动决策
+
+rules:
+  - name: "low_value_approve"
+    condition: "amount < 1000"
+    action: "auto_approve"
+    priority: 1
+
+  - name: "high_value_escalate"
+    condition: "amount > 50000"
+    action: "escalate_to_manager"
+    priority: 2
+
+  - name: "risk_check"
+    condition: "risk_score > 0.7"
+    action: "require_review"
+    priority: 3
+
+approval_levels:
+  - level: 1
+    name: "self"
+    max_amount: 1000
+    approvers: ["self"]
+
+  - level: 2
+    name: "manager"
+    max_amount: 50000
+    approvers: ["department_manager"]
+
+  - level: 3
+    name: "director"
+    max_amount: 500000
+    approvers: ["director"]
+
+  - level: 4
+    name: "c_level"
+    max_amount: null
+    approvers: ["cfo", "ceo"]
+
+notification:
+  enabled: true
+  channels: ["email", "dingtalk"]
+  remind_interval: 3600
+
+performance:
+  cache_rules: true
+  parallel_check: true

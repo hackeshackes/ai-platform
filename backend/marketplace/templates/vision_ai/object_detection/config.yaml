@@ -1,0 +1,38 @@
+# 物体检测配置
+name: "物体检测"
+version: "1.0.0"
+description: "实时物体检测，支持多种预训练模型和自定义类别"
+
+model:
+  name: "yolov8"
+  version: "m"
+  confidence: 0.5
+  iou: 0.45
+
+classes:
+  - "person"
+  - "car"
+  - "truck"
+  - "bus"
+  - "motorcycle"
+  - "bicycle"
+
+tracking:
+  enabled: false
+  algorithm: "sort"
+  max_age: 30
+  min_hits: 3
+
+output:
+  include_masks: false
+  include_keypoints: false
+  draw_boxes: true
+
+performance:
+  input_size: 640
+  batch_size: 1
+  use_gpu: false
+
+zones:
+  enabled: false
+  defined_zones: []

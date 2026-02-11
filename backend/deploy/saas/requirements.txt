@@ -1,0 +1,5 @@
+aiohttp==3.9.1
+psutil==5.9.8
+pyyaml==6.0.1
+docker==7.0.0
+python-json-logger==2.0.7

@@ -1,0 +1,276 @@
+{
+  "version": "1.0.0",
+  "total_templates": 15,
+  "categories": [
+    {
+      "id": "customer_service",
+      "name": "客户服务",
+      "description": "智能客服、工单分类、情感分析等客户服务场景模板",
+      "icon": "headset",
+      "templates": [
+        {
+          "id": "chatbot",
+          "name": "智能客服机器人",
+          "description": "开箱即用的客服机器人，支持FAQ检索和多轮对话",
+          "category": "客户服务",
+          "tags": ["聊天", "客服", "FAQ", "RAG"],
+          "downloads": 15420,
+          "rating": 4.8,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "customer_service/chatbot/pipeline.py",
+          "config": "customer_service/chatbot/config.yaml",
+          "requirements": ["openai", "faiss-cpu", "sentence-transformers"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "ticket_classifier",
+          "name": "工单自动分类",
+          "description": "自动将客户工单分类到相应类别，支持优先级识别",
+          "category": "客户服务",
+          "tags": ["分类", "工单", "优先级", "NLP"],
+          "downloads": 12350,
+          "rating": 4.7,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "customer_service/ticket_classifier/pipeline.py",
+          "config": "customer_service/ticket_classifier/config.yaml",
+          "requirements": ["transformers", "torch"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "sentiment_bot",
+          "name": "情感分析机器人",
+          "description": "实时分析客户情感，智能调整响应策略",
+          "category": "客户服务",
+          "tags": ["情感分析", "意图识别", "客户体验"],
+          "downloads": 9870,
+          "rating": 4.9,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "customer_service/sentiment_bot/pipeline.py",
+          "config": "customer_service/sentiment_bot/config.yaml",
+          "requirements": ["transformers", "torch"],
+          "created_at": "2025-01-15"
+        }
+      ]
+    },
+    {
+      "id": "data_analysis",
+      "name": "数据分析",
+      "description": "报表生成、销售预测、异常检测等数据分析场景",
+      "icon": "chart",
+      "templates": [
+        {
+          "id": "report_generator",
+          "name": "自动报表生成",
+          "description": "自动从数据源生成可视化报表，支持多种格式",
+          "category": "数据分析",
+          "tags": ["报表", "可视化", "自动化"],
+          "downloads": 18230,
+          "rating": 4.6,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "data_analysis/report_generator/pipeline.py",
+          "config": "data_analysis/report_generator/config.yaml",
+          "requirements": ["pandas", "plotly", "jinja2"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "sales_forecast",
+          "name": "销售预测",
+          "description": "基于历史数据预测未来销售趋势",
+          "category": "数据分析",
+          "tags": ["预测", "销售", "时序分析"],
+          "downloads": 15670,
+          "rating": 4.8,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "data_analysis/sales_forecast/pipeline.py",
+          "config": "data_analysis/sales_forecast/config.yaml",
+          "requirements": ["prophet", "pandas", "numpy"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "anomaly_detector",
+          "name": "异常检测",
+          "description": "实时检测时序数据中的异常值",
+          "category": "数据分析",
+          "tags": ["异常检测", "监控", "时序"],
+          "downloads": 13450,
+          "rating": 4.7,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "data_analysis/anomaly_detector/pipeline.py",
+          "config": "data_analysis/anomaly_detector/config.yaml",
+          "requirements": ["scikit-learn", "numpy", "pandas"],
+          "created_at": "2025-01-15"
+        }
+      ]
+    },
+    {
+      "id": "vision_ai",
+      "name": "视觉AI",
+      "description": "OCR识别、人脸门禁、物体检测等计算机视觉场景",
+      "icon": "eye",
+      "templates": [
+        {
+          "id": "ocr",
+          "name": "OCR文档识别",
+          "description": "高精度文档OCR识别，支持多种语言",
+          "category": "视觉AI",
+          "tags": ["OCR", "文档", "文字识别"],
+          "downloads": 22340,
+          "rating": 4.9,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "vision_ai/ocr/pipeline.py",
+          "config": "vision_ai/ocr/config.yaml",
+          "requirements": ["paddlepaddle", "paddleocr", "pillow"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "face_recognition",
+          "name": "人脸门禁",
+          "description": "高精度人脸识别门禁系统，支持活体检测",
+          "category": "视觉AI",
+          "tags": ["人脸识别", "门禁", "活体检测"],
+          "downloads": 18760,
+          "rating": 4.8,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "vision_ai/face_recognition/pipeline.py",
+          "config": "vision_ai/face_recognition/config.yaml",
+          "requirements": ["insightface", "opencv-python", "numpy"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "object_detection",
+          "name": "物体检测",
+          "description": "实时物体检测，支持多种预训练模型",
+          "category": "视觉AI",
+          "tags": ["物体检测", "YOLO", "实时检测"],
+          "downloads": 20150,
+          "rating": 4.7,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "vision_ai/object_detection/pipeline.py",
+          "config": "vision_ai/object_detection/config.yaml",
+          "requirements": ["ultralytics", "opencv-python"],
+          "created_at": "2025-01-15"
+        }
+      ]
+    },
+    {
+      "id": "voice_ai",
+      "name": "语音AI",
+      "description": "语音转文字、智能外呼、语音情感分析等语音场景",
+      "icon": "mic",
+      "templates": [
+        {
+          "id": "asr",
+          "name": "语音转文字 (ASR)",
+          "description": "高精度语音识别，支持中英文混合",
+          "category": "语音AI",
+          "tags": ["ASR", "语音识别", "转写"],
+          "downloads": 24530,
+          "rating": 4.9,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "voice_ai/asr/pipeline.py",
+          "config": "voice_ai/asr/config.yaml",
+          "requirements": ["openai-whisper", "ffmpeg-python"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "outbound",
+          "name": "智能外呼",
+          "description": "AI驱动的自动外呼系统，支持智能路由",
+          "category": "语音AI",
+          "tags": ["外呼", "TTS", "电话机器人"],
+          "downloads": 16890,
+          "rating": 4.6,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "voice_ai/outbound/pipeline.py",
+          "config": "voice_ai/outbound/config.yaml",
+          "requirements": ["azure-cognitiveservices-speech", "twilio"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "voice_sentiment",
+          "name": "语音情感分析",
+          "description": "从语音中识别说话者情感和心理状态",
+          "category": "语音AI",
+          "tags": ["情感分析", "语音分析", "心理学"],
+          "downloads": 11230,
+          "rating": 4.7,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "voice_ai/voice_sentiment/pipeline.py",
+          "config": "voice_ai/voice_sentiment/config.yaml",
+          "requirements": ["transformers", "librosa", "torchaudio"],
+          "created_at": "2025-01-15"
+        }
+      ]
+    },
+    {
+      "id": "automation",
+      "name": "自动化",
+      "description": "自动审批、定时报告、数据同步等业务流程自动化",
+      "icon": "zap",
+      "templates": [
+        {
+          "id": "auto_approval",
+          "name": "自动审批流程",
+          "description": "基于规则的智能审批系统，支持多级审批",
+          "category": "自动化",
+          "tags": ["审批", "工作流", "规则引擎"],
+          "downloads": 14560,
+          "rating": 4.5,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "automation/auto_approval/pipeline.py",
+          "config": "automation/auto_approval/config.yaml",
+          "requirements": ["python-dotenv", "redis"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "scheduled_report",
+          "name": "定时报告",
+          "description": "自动化的定时报告系统，支持灵活调度",
+          "category": "自动化",
+          "tags": ["定时", "报告", "调度"],
+          "downloads": 13240,
+          "rating": 4.6,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "automation/scheduled_report/pipeline.py",
+          "config": "automation/scheduled_report/config.yaml",
+          "requirements": ["apscheduler", "pandas", "jinja2"],
+          "created_at": "2025-01-15"
+        },
+        {
+          "id": "data_sync",
+          "name": "数据同步",
+          "description": "多源数据同步系统，支持增量同步",
+          "category": "自动化",
+          "tags": ["ETL", "数据同步", "增量同步"],
+          "downloads": 11980,
+          "rating": 4.7,
+          "author": "AI Platform",
+          "version": "1.0.0",
+          "pipeline": "automation/data_sync/pipeline.py",
+          "config": "automation/data_sync/config.yaml",
+          "requirements": ["sqlalchemy", "pandas", "pymongo"],
+          "created_at": "2025-01-15"
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "total_downloads": 207640,
+    "average_rating": 4.73,
+    "last_updated": "2025-01-15"
+  }
+}

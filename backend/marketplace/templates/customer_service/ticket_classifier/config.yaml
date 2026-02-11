@@ -1,0 +1,29 @@
+# 工单自动分类配置
+name: "工单自动分类"
+version: "1.0.0"
+description: "自动将客户工单分类到相应类别，支持优先级识别"
+
+labels:
+  - "技术问题"
+  - "账单问题"
+  - "功能建议"
+  - "投诉"
+  - "一般咨询"
+  - "Bug反馈"
+
+model:
+  name: "bert-base-chinese"
+  threshold: 0.7
+
+priority_mapping:
+  high: ["投诉", "Bug反馈", "服务中断"]
+  medium: ["技术问题", "账单问题"]
+  low: ["功能建议", "一般咨询"]
+
+auto_tagging:
+  enabled: true
+  max_tags: 5
+
+performance:
+  batch_size: 32
+  max_length: 512

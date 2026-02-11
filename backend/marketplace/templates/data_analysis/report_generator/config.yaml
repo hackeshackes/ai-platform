@@ -1,0 +1,39 @@
+# 自动报表生成配置
+name: "自动报表生成"
+version: "1.0.0"
+description: "自动从数据源生成可视化报表，支持多种格式"
+
+data_sources:
+  - type: "database"
+    connection: "postgresql://localhost:5432/analytics"
+  - type: "api"
+    endpoint: "https://api.example.com/metrics"
+  - type: "file"
+    path: "data/*.csv"
+
+report_types:
+  - "daily_summary"
+  - "weekly_analysis"
+  - "monthly_review"
+  - "custom"
+
+output:
+  formats:
+    - "html"
+    - "pdf"
+    - "excel"
+    - "markdown"
+  template: "default"
+
+charts:
+  enabled: true
+  library: "plotly"
+  default_charts:
+    - "line"
+    - "bar"
+    - "pie"
+    - "heatmap"
+
+schedule:
+  enabled: false
+  cron: "0 8 * * 1"  # 每周一早上8点

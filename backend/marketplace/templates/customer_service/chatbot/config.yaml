@@ -1,0 +1,29 @@
+# 智能客服机器人配置
+name: "智能客服机器人"
+version: "1.0.0"
+description: "开箱即用的客服机器人，支持FAQ检索和多轮对话"
+
+model:
+  name: "gpt-3.5-turbo"
+  temperature: 0.7
+  max_tokens: 500
+
+retrieval:
+  top_k: 5
+  score_threshold: 0.7
+  embeddings_model: "text-embedding-ada-002"
+
+knowledge_base:
+  path: "data/faq.json"
+  chunk_size: 500
+  chunk_overlap: 50
+
+ui:
+  enable_voice: false
+  theme: "light"
+  max_history: 10
+
+performance:
+  timeout: 30
+  max_concurrent: 100
+  cache_ttl: 3600

@@ -1,0 +1,30 @@
+# 语音转文字配置
+name: "语音转文字 (ASR)"
+version: "1.0.0"
+description: "高精度语音识别，支持中英文混合和多人对话
+
+model:
+  name: "whisper"
+  model_size: "medium"
+  language: "zh-CN"
+  beam_size: 5
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  format: "wav"
+
+features:
+  punctuate: true
+  speaker_diarization: false
+  word_timestamps: true
+
+output:
+  format: "json"
+  include_confidence: true
+  include_segments: true
+
+performance:
+  use_gpu: false
+  batch_size: 1
+  timeout: 300

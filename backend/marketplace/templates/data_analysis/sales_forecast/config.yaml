@@ -1,0 +1,31 @@
+# 销售预测配置
+name: "销售预测"
+version: "1.0.0"
+description: "基于历史数据预测未来销售趋势，支持多种预测模型"
+
+model:
+  type: "prophet"
+  yearly_seasonality: true
+  weekly_seasonality: true
+  daily_seasonality: false
+  seasonality_mode: "multiplicative"
+
+parameters:
+  forecast_periods: 30
+  confidence_level: 0.95
+  changepoint_prior_scale: 0.05
+
+data:
+  min_history_days: 90
+  date_column: "date"
+  value_column: "sales"
+  aggregation: "daily"
+
+output:
+  include_components: true
+  include_uncertainty: true
+  visualization: true
+
+performance:
+  max_history_days: 1095
+  batch_size: 1000

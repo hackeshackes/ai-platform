@@ -1,0 +1,36 @@
+# 人脸门禁配置
+name: "人脸门禁"
+version: "1.0.0"
+description: "高精度人脸识别门禁系统，支持活体检测和黑名单"
+
+model:
+  name: "arcface"
+  backbone: "resnet100"
+  embed_size: 512
+
+recognition:
+  threshold: 0.6
+  max_faces: 10
+  min_face_size: 60
+
+liveness_detection:
+  enabled: true
+  methods:
+    - "blink"
+    - "mouth_open"
+    - "head_turn"
+
+database:
+  type: "redis"
+  host: "localhost"
+  port: 6379
+
+output:
+  include_embedding: false
+  log_access: true
+  alert_on_unknown: true
+
+security:
+  anti_spoofing: true
+  max_attempts: 3
+  lockout_duration: 300

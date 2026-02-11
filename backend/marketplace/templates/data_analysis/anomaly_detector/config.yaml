@@ -1,0 +1,37 @@
+# 异常检测配置
+name: "异常检测"
+version: "1.0.0"
+description: "实时检测时序数据中的异常值，支持多种检测算法"
+
+model:
+  type: "isolation_forest"
+  contamination: 0.01
+  n_estimators: 100
+
+algorithm:
+  - "zscore"
+  - "iqr"
+  - "isolation_forest"
+  - "lstm_autoencoder"
+
+sensitivity:
+  high: 0.95
+  medium: 0.99
+  low: 0.999
+
+output:
+  include_explanation: true
+  include_visualization: true
+  alert_on_anomaly: true
+
+alerting:
+  enabled: true
+  channels:
+    - "email"
+    - "slack"
+  min_severity: "medium"
+
+performance:
+  window_size: 100
+  batch_size: 10000
+  real_time: true

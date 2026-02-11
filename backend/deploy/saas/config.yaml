@@ -1,0 +1,152 @@
+# SaaS一键部署系统配置
+# AI Platform Deployment Configuration
+
+# 应用配置
+app:
+  name: "AI Platform SaaS Deployer"
+  version: "1.0.0"
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
+  log_level: "INFO"
+
+# Docker配置
+docker:
+  socket: "/var/run/docker.sock"
+  network: "ai-platform-network"
+  registry: "registry.example.com"
+  image_pull_policy: "always"
+  
+# 部署配置
+deploy:
+  default:
+    replicas: 1
+    cpu_limit: "1000m"
+    memory_limit: "1Gi"
+    port: 8080
+    ssl_enabled: true
+    health_check_path: "/health"
+    deploy_strategy: "rolling"
+    
+  # 扩容规则
+  scaling:
+    min_replicas: 1
+    max_replicas: 10
+    scale_up_threshold: 80
+    scale_down_threshold: 30
+    cooldown_seconds: 60
+    
+# 监控配置
+monitor:
+  enabled: true
+  metrics_interval: 10
+  retention_seconds: 3600
+  log_path: "/var/log/ai-platform"
+  
+  # 告警规则
+  alerts:
+    cpu_threshold_warning: 80
+    cpu_threshold_critical: 95
+    memory_threshold_warning: 85
+    memory_threshold_critical: 95
+    error_rate_threshold: 1.0
+    latency_threshold_p99: 1000
+    
+  # 通知渠道
+  notifications:
+    console: true
+    email:
+      enabled: false
+      smtp_host: "smtp.example.com"
+      smtp_port: 587
+      from_address: "alerts@example.com"
+    webhook:
+      enabled: false
+      url: "https://hooks.example.com/alerts"
+      
+# CDN配置
+cdn:
+  provider: "cloudflare"
+  default_ttl: 3600
+  max_ttl: 86400
+  
+  # 缓存规则
+  cache_rules:
+    - name: "静态资源"
+      patterns:
+        - "*.css"
+        - "*.js"
+        - "*.ico"
+        - "*.png"
+        - "*.jpg"
+      ttl: 86400
+      
+    - name: "API响应"
+      patterns:
+        - "/api/*"
+      ttl: 0
+      
+    - name: "媒体文件"
+      patterns:
+        - "*.mp4"
+        - "*.mp3"
+        - "*.pdf"
+      ttl: 604800
+      
+# 资源管理
+resource:
+  # 自动扩容策略
+  auto_scaling:
+    enabled: true
+    metrics:
+      - cpu
+      - memory
+      - requests
+    evaluation_interval: 60
+    
+  # 负载均衡
+  load_balancer:
+    algorithm: "round_robin"
+    health_check_path: "/health"
+    health_check_interval: 10
+    unhealthy_threshold: 3
+    
+# SSL配置
+ssl:
+  provider: "letsencrypt"
+  email: "admin@example.com"
+  staging: false
+  
+# 域名配置
+dns:
+  provider: "cloudflare"
+  ttl: 3600
+  auto_create_records: true
+  
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file:
+    enabled: true
+    path: "/var/log/ai-platform/app.log"
+    max_size: "100MB"
+    backup_count: 5
+    
+# 性能配置
+performance:
+  deploy_timeout: 180  # 3分钟
+  health_check_timeout: 10
+  parallel_deploy: true
+  max_concurrent_deploys: 5
+  
+# 安全配置
+security:
+  api_key_required: false
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+  cors:
+    enabled: true
+    origins:
+      - "https://ai-platform.example.com"

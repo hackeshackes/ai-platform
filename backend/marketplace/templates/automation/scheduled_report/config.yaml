@@ -1,0 +1,39 @@
+# 定时报告配置
+name: "定时报告"
+version: "1.0.0"
+description: "自动化的定时报告系统，支持灵活的调度和数据源
+
+schedule:
+  type: "cron"
+  expression: "0 8 * * *"  # 每天早上8点
+  timezone: "Asia/Shanghai"
+
+report:
+  type: "daily"
+  template: "default"
+  formats:
+    - "html"
+    - "pdf"
+  data_sources:
+    - "database"
+    - "api"
+    - "file"
+
+delivery:
+  channels:
+    - type: "email"
+      recipients: ["team@example.com"]
+      subject: "每日报告"
+    - type: "slack"
+      channel: "#reports"
+    - type: "webhook"
+      url: "https://example.com/webhook"
+
+retry:
+  enabled: true
+  max_attempts: 3
+  interval: 300
+
+history:
+  keep_days: 30
+  compress: true

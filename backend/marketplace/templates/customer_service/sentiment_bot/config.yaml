@@ -1,0 +1,33 @@
+# 情感分析机器人配置
+name: "情感分析机器人"
+version: "1.0.0"
+description: "实时分析客户情感，智能调整响应策略"
+
+model:
+  name: "roberta-wwm-ext"
+  batch_size: 32
+
+thresholds:
+  positive: 0.6
+  negative: 0.6
+  escalate_human: 0.85
+
+response_templates:
+  positive:
+    - "很高兴能帮到您！"
+    - "感谢您的认可，我们会继续努力！"
+  negative:
+    - "非常抱歉给您带来不便。"
+    - "我理解您的心情，让我尽快为您解决。"
+  neutral:
+    - "请问还有什么可以帮您的？"
+    - "感谢您的反馈。"
+
+escalation:
+  enabled: true
+  max_retries: 2
+  auto_escalate_score: 0.9
+
+performance:
+  max_concurrent: 50
+  timeout: 10

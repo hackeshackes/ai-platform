@@ -1,0 +1,28 @@
+# Edge AI Deployment Dependencies
+# AI Platform v7 - 边缘AI部署
+
+# Core ML Dependencies
+torch>=1.9.0
+torchvision>=0.10.0
+tensorflow>=2.8.0
+
+# ONNX Dependencies
+onnx>=1.12.0
+onnxruntime>=1.12.0
+onnxruntime-tools>=1.11.0
+
+# TensorRT Dependencies (NVIDIA Jetson/Desktop)
+tensorrt>=8.5.0
+
+# Edge Device Dependencies
+aiohttp>=3.8.0
+pyyaml>=6.0
+
+# Optional: PyCUDA for TensorRT inference
+pycuda>=2022.1
+
+# Optional: Edge TPU
+# tflite-runtime>=2.5.0
+
+# Optional: Intel NCS2
+# openvino>=2022.3

@@ -1,0 +1,29 @@
+# Generation Module Dependencies
+# 多模态生成模块依赖
+
+# OpenAI API
+openai>=1.0.0
+aiohttp>=3.9.0
+
+# Azure Cognitive Services
+azure-cognitiveservices-speech>=1.32.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Video Processing (可选)
+# moviepy>=1.0.3
+# opencv-python>=4.8.0
+
+# Stable Diffusion API Client (可选)
+# stability-sdk>=0.8.0
+
+# ElevenLabs (可选)
+# elevenlabs>=0.2.0
+
+# 音频处理 (可选)
+# pydub>=0.25.1
+# scipy>=1.11.0
+
+# 视频处理 (可选)
+# av>=12.0.0

@@ -1,0 +1,34 @@
+# OCR文档识别配置
+name: "OCR文档识别"
+version: "1.0.0"
+description: "高精度文档OCR识别，支持多种语言和文档类型"
+
+model:
+  name: "paddleocr"
+  use_gpu: false
+  language: "ch"
+  det_model: "ch_ppocr_mobile_v2.0_det"
+  rec_model: "ch_ppocr_mobile_v2.0_rec"
+
+preprocessing:
+  grayscale: true
+  denoise: true
+  contrast_enhancement: true
+  max_size: 2048
+
+output:
+  include_boxes: true
+  include_confidence: true
+  format: "json"
+  table_structure: false
+
+supported_formats:
+  - "jpg"
+  - "jpeg"
+  - "png"
+  - "bmp"
+  - "pdf"
+
+performance:
+  batch_size: 1
+  timeout: 60

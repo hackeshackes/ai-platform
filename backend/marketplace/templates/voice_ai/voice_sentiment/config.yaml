@@ -1,0 +1,35 @@
+# 语音情感分析配置
+name: "语音情感分析"
+version: "1.0.0"
+description: "从语音中识别说话者情感和心理状态
+
+model:
+  name: "wav2vec2"
+  checkpoint: "wav2vec2-large-xlsr-53-chinese-zh-cn"
+  num_classes: 7
+
+emotions:
+  - "neutral"
+  - "happy"
+  - "sad"
+  - "angry"
+  - "fearful"
+  - "surprised"
+  - "disgust"
+
+features:
+  pitch: true
+  energy: true
+  speaking_rate: true
+  jitter: true
+  shimmer: true
+
+output:
+  include_scores: true
+  include_features: false
+  visualization: true
+
+performance:
+  use_gpu: false
+  batch_size: 1
+  max_duration: 300

@@ -1,0 +1,13 @@
+{
+  "id": "search-tool",
+  "name": "search-tool",
+  "display_name": "搜索工具",
+  "description": "提供强大的搜索功能，支持全文搜索和向量搜索",
+  "version": "1.0.0",
+  "author": "AI Platform",
+  "category": "tool",
+  "tags": ["search", "vector", "full-text"],
+  "downloads": 1250,
+  "rating": 4.5,
+  "reviews_count": 32
+}

@@ -1,0 +1,744 @@
+/* AI Platform 教育中心样式 */
+:root {
+  --primary: #3B82F6;
+  --primary-dark: #2563EB;
+  --secondary: #8B5CF6;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-tertiary: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border: #334155;
+  --radius: 12px;
+}
+
+.education-center {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.education-header {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  padding: 40px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.education-header h1 {
+  font-size: 32px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-top: 24px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-secondary);
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.filter-section {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--bg-secondary);
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 12px 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.category-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.education-content {
+  padding: 24px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.course-count {
+  padding: 4px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.course-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+  border-color: var(--primary);
+}
+
+.course-thumbnail {
+  height: 160px;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.course-icon {
+  font-size: 48px;
+}
+
+.level-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.course-content {
+  padding: 20px;
+}
+
+.course-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.course-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.course-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.course-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.tag {
+  padding: 4px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.course-progress {
+  margin-bottom: 16px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.progress-label,
+.progress-percent {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.progress-bar-container {
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 3px;
+}
+
+.course-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.start-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.continue-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.completed-btn {
+  background: var(--success);
+  color: white;
+}
+
+.course-detail {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+.course-header {
+  margin-bottom: 32px;
+}
+
+.course-header h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.learning-progress {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 24px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+}
+
+.chapter-content {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.chapter-content h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nav-btn {
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.nav-btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 视频播放器 */
+.video-player-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  padding: 40px 16px 16px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.video-player-container:hover .video-controls {
+  opacity: 1;
+}
+
+.controls-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.control-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.time-display {
+  color: white;
+  font-size: 13px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.video-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.3);
+}
+
+.large-play-btn {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* 代码编辑器 */
+.code-editor-container {
+  background: #1E1E1E;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'SF Mono', monospace;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #2D2D2D;
+}
+
+.language-badge {
+  padding: 4px 12px;
+  background: var(--secondary);
+  border-radius: 12px;
+  font-size: 12px;
+  color: white;
+}
+
+.header-btn {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.run-btn {
+  background: var(--success) !important;
+  color: white !important;
+}
+
+.editor-body {
+  display: flex;
+  min-height: 200px;
+}
+
+.line-numbers {
+  padding: 16px 12px;
+  background: #252526;
+  color: #858585;
+  font-size: 14px;
+  text-align: right;
+  border-right: 1px solid #3D3D3D;
+}
+
+.line-number {
+  padding: 0 8px;
+}
+
+.code-area-wrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.code-highlight {
+  position: absolute;
+  inset: 16px;
+  margin: 0;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.code-highlight .comment { color: #6A9955; }
+.code-highlight .keyword { color: #569CD6; }
+.code-highlight .string { color: #CE9178; }
+
+.code-textarea {
+  position: absolute;
+  inset: 16px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: transparent;
+  caret-color: white;
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+}
+
+.editor-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #007ACC;
+  color: white;
+  font-size: 12px;
+}
+
+/* 进度条 */
+.progress-bar-wrapper {
+  width: 100%;
+}
+
+.progress-bar-track {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.circular-progress-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.circular-progress svg {
+  transform: rotate(-90deg);
+}
+
+.circular-bg {
+  stroke: var(--bg-tertiary);
+}
+
+.circular-progress-bar {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.circular-label {
+  position: absolute;
+  inset: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.circular-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.step-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0;
+  position: relative;
+}
+
+.step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.step-item.completed .step-indicator {
+  background: var(--success);
+  color: white;
+}
+
+.step-item.current .step-indicator {
+  background: var(--primary);
+  color: white;
+}
+
+.step-content {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.step-label {
+  display: block;
+  font-weight: 500;
+}
+
+.step-description {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.step-connector {
+  position: absolute;
+  left: 15px;
+  top: 44px;
+  width: 2px;
+  height: calc(100% - 32px);
+  background: var(--bg-tertiary);
+}
+
+.step-item.completed .step-connector {
+  background: var(--success);
+}
+
+.education-footer {
+  padding: 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.locked-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.lock-icon {
+  font-size: 32px;
+}
+
+.video-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+}
+
+.error-icon {
+  font-size: 48px;
+}
+
+.retry-btn {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.exercise-section {
+  margin-top: 16px;
+}
+
+.submit-btn {
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.progress-percentage {
+  text-align: right;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}

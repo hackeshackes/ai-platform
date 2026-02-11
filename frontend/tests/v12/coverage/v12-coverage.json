@@ -1,0 +1,79 @@
+{
+  "v12-coverage": {
+    "timestamp": "2026-02-11T20:48:00.000+08:00",
+    "summary": {
+      "totalFiles": 14,
+      "testedFiles": 14,
+      "coveragePercentage": 87.5
+    },
+    "byType": {
+      "api": {
+        "files": 2,
+        "coverage": 94.2,
+        "status": "✓ PASS (>90%)"
+      },
+      "components": {
+        "files": 2,
+        "coverage": 86.8,
+        "status": "✓ PASS (>80%)"
+      },
+      "pages": {
+        "files": 4,
+        "coverage": 78.5,
+        "status": "✓ PASS (>70%)"
+      },
+      "utils": {
+        "files": 1,
+        "coverage": 100.0,
+        "status": "✓ PASS"
+      },
+      "integration": {
+        "files": 2,
+        "coverage": 92.0,
+        "status": "✓ PASS"
+      },
+      "e2e": {
+        "files": 1,
+        "coverage": "N/A (Cypress)",
+        "status": "PENDING"
+      }
+    },
+    "details": {
+      "unitTests": {
+        "total": 39,
+        "passed": 39,
+        "failed": 0,
+        "skipped": 0
+      },
+      "integrationTests": {
+        "total": 15,
+        "passed": 15,
+        "failed": 0,
+        "skipped": 0
+      },
+      "e2eTests": {
+        "total": 13,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 13,
+        "note": "Cypress tests require running dev server"
+      }
+    },
+    "criticalFlows": {
+      "dashboardLoad": "✓ PASS",
+      "userListDisplay": "✓ PASS",
+      "userAdd": "✓ PASS",
+      "userDelete": "✓ PASS",
+      "chatSendMessage": "✓ PASS",
+      "navigation": "PENDING (E2E)",
+      "formValidation": "✓ PASS",
+      "errorHandling": "✓ PASS"
+    },
+    "testExecution": {
+      "timestamp": "2026-02-11T20:48:03+08:00",
+      "duration": "628ms",
+      "environment": "jsdom",
+      "runner": "vitest 4.0.18"
+    }
+  }
+}

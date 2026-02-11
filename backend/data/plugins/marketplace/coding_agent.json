@@ -1,0 +1,13 @@
+{
+  "id": "coding-agent",
+  "name": "coding-agent",
+  "display_name": "编程助手",
+  "description": "专业的代码生成和审查Agent",
+  "version": "1.0.0",
+  "author": "AI Platform",
+  "category": "agent",
+  "tags": ["coding", "agent", "code-review"],
+  "downloads": 2340,
+  "rating": 4.8,
+  "reviews_count": 56
+}

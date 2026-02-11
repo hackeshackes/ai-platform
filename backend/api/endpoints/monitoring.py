@@ -1,225 +1,476 @@
 """
-监控告警API端点 v2.0 Phase 2
+监控API端点 - Monitoring Endpoints
+
+提供健康检查、性能指标、日志查询和告警状态的REST API
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from fastapi import APIRouter, HTTPException, Depends, Query
-from typing import List, Optional
-from pydantic import BaseModel
+import logging
+from typing import Dict, Any, List, Optional
 from datetime import datetime
-from enum import Enum
+from fastapi import APIRouter, HTTPException, Query, Depends
+from pydantic import BaseModel, Field
 
-from monitoring.monitor import alert_manager, AlertSeverity, AlertStatus
-from pipeline.data.pipeline import data_pipeline
-from api.endpoints.auth import get_current_user
+logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/monitoring", tags=["监控"])
 
-class AlertRuleCreate(BaseModel):
-    """创建告警规则"""
-    rule_id: str
+
+def get_monitoring_system():
+    """获取监控系统依赖（实际项目中可能需要从依赖注入获取）"""
+    from .monitoring import get_monitoring_system
+    return get_monitoring_system()
+
+
+# ==================== 响应模型 ====================
+
+class HealthCheckResponse(BaseModel):
+    """健康检查响应"""
+    status: str
+    overall_status: str
+    checks: Dict[str, Any]
+    summary: Dict[str, int]
+    total_duration_ms: float
+    timestamp: str
+
+
+class MetricsResponse(BaseModel):
+    """性能指标响应"""
+    timestamp: str
+    system: Dict[str, Any]
+    api: Dict[str, Any]
+    database: Dict[str, Any]
+    counters: Dict[str, float]
+    gauges: Dict[str, float]
+    histograms: Dict[str, Any]
+
+
+class AlertResponse(BaseModel):
+    """告警响应"""
+    name: str
+    severity: str
+    status: str
+    message: str
+    current_value: float
+    started_at: str
+    evaluation_count: int = 0
+
+
+class AlertRuleResponse(BaseModel):
+    """告警规则响应"""
     name: str
     condition: str
-    threshold: float
-    duration_seconds: int = 300
     severity: str
-    channels: List[str]
+    message: str
+    enabled: bool
+    duration_seconds: int
 
-@router.get("/alerts/rules")
-async def list_alert_rules():
-    """
-    获取告警规则列表
-    
-    v2.0 Phase 2: 监控告警
-    """
-    return {"rules": alert_manager.get_rules()}
 
-@router.post("/alerts/rules")
-async def create_alert_rule(rule: AlertRuleCreate, current_user = Depends(get_current_user)):
+class LogQueryResponse(BaseModel):
+    """日志查询响应"""
+    logs: List[Dict[str, Any]]
+    total: int
+    page: int
+    page_size: int
+
+
+class TracingResponse(BaseModel):
+    """链路追踪响应"""
+    trace_id: str
+    spans_count: int
+    total_duration_ms: float
+    spans: List[Dict[str, Any]]
+
+
+# ==================== API端点 ====================
+
+@router.get("/health", response_model=HealthCheckResponse)
+async def health_check(system=Depends(get_monitoring_system)):
     """
-    创建告警规则
+    健康检查
     
-    v2.0 Phase 2: 监控告警
+    返回系统各组件的健康状态
     """
-    from monitoring.monitor import AlertRule
-    
     try:
-        severity = AlertSeverity(rule.severity)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid severity: {rule.severity}")
-    
-    new_rule = AlertRule(
-        rule_id=rule.rule_id,
-        name=rule.name,
-        condition=rule.condition,
-        threshold=rule.threshold,
-        duration_seconds=rule.duration_seconds,
-        severity=severity,
-        channels=rule.channels
-    )
-    
-    alert_manager.add_custom_rule(new_rule)
-    
-    return {"message": "Rule created", "rule_id": rule.rule_id}
+        result = await system.run_health_check()
+        return result
+    except Exception as e:
+        logger.error(f"健康检查失败: {e}")
+        raise HTTPException(status_code=500, detail=f"健康检查失败: {str(e)}")
 
-@router.get("/alerts/active")
-async def get_active_alerts(severity: Optional[str] = None):
+
+@router.get("/health/{component}")
+async def health_check_component(
+    component: str,
+    system=Depends(get_monitoring_system)
+):
+    """
+    单个组件健康检查
+    
+    Args:
+        component: 组件名称
+    """
+    try:
+        result = await system.health.run_check(component)
+        if result:
+            return {
+                "name": result.name,
+                "status": result.status.value,
+                "message": result.message,
+                "details": result.details,
+                "duration_ms": result.duration_ms
+            }
+        else:
+            raise HTTPException(status_code=404, detail=f"未找到组件: {component}")
+    except Exception as e:
+        logger.error(f"组件健康检查失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/metrics", response_model=MetricsResponse)
+async def get_metrics(system=Depends(get_monitoring_system)):
+    """
+    获取性能指标
+    
+    返回系统、API、数据库等性能指标
+    """
+    try:
+        metrics = await system.collect_metrics()
+        return metrics
+    except Exception as e:
+        logger.error(f"获取性能指标失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/metrics/prometheus")
+async def get_prometheus_metrics(system=Depends(get_monitoring_system)):
+    """
+    Prometheus格式指标
+    
+    返回Prometheus格式的性能指标
+    """
+    try:
+        prometheus_format = system.metrics.to_prometheus_format()
+        return Response(
+            content=prometheus_format,
+            media_type="text/plain"
+        )
+    except Exception as e:
+        logger.error(f"获取Prometheus指标失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/alerts", response_model=List[AlertResponse])
+async def get_active_alerts(system=Depends(get_monitoring_system)):
     """
     获取活跃告警
     
-    v2.0 Phase 2: 监控告警
+    返回当前活跃的告警列表
     """
     try:
-        severity_enum = AlertSeverity(severity) if severity else None
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid severity: {severity}")
-    
-    alerts = alert_manager.get_active_alerts(severity_enum)
-    
-    return {
-        "total": len(alerts),
-        "alerts": [
-            {
-                "alert_id": a.alert_id,
-                "rule_name": a.rule_name,
-                "severity": a.severity.value,
-                "value": a.value,
-                "threshold": a.threshold,
-                "message": a.message,
-                "fired_at": a.fired_at.isoformat()
-            }
-            for a in alerts
-        ]
-    }
+        alerts = system.alerts.get_active_alerts()
+        return alerts
+    except Exception as e:
+        logger.error(f"获取活跃告警失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/alerts/{alert_id}/resolve")
-async def resolve_alert(alert_id: str, current_user = Depends(get_current_user)):
-    """
-    解决告警
-    
-    v2.0 Phase 2: 监控告警
-    """
-    try:
-        await alert_manager.resolve_alert(alert_id)
-        return {"message": "Alert resolved"}
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
-@router.post("/alerts/{alert_id}/silence")
-async def silence_alert(alert_id: str, duration_hours: int = 24):
-    """
-    静默告警
-    
-    v2.0 Phase 2: 监控告警
-    """
-    alert_manager.silence_alert(alert_id, duration_hours)
-    return {"message": "Alert silenced"}
 
 @router.get("/alerts/history")
 async def get_alert_history(
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
-    limit: int = Query(default=100, le=1000)
+    since: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = Query(100, ge=1, le=1000),
+    system=Depends(get_monitoring_system)
 ):
     """
     获取告警历史
     
-    v2.0 Phase 2: 监控告警
+    Args:
+        since: 开始时间（ISO格式）
+        status: 告警状态
+        limit: 返回数量限制
     """
-    history = alert_manager.get_alert_history(start_time, end_time, limit)
-    
-    return {
-        "total": len(history),
-        "alerts": [
-            {
-                "alert_id": a.alert_id,
-                "rule_name": a.rule_name,
-                "severity": a.severity.value,
-                "status": a.status.value,
-                "fired_at": a.fired_at.isoformat(),
-                "resolved_at": a.resolved_at.isoformat() if a.resolved_at else None
-            }
-            for a in history
-        ]
-    }
+    try:
+        from datetime import datetime as dt
+        
+        since_dt = None
+        if since:
+            since_dt = dt.fromisoformat(since)
+        
+        from .alerts import AlertStatus
+        alert_status = None
+        if status:
+            try:
+                alert_status = AlertStatus(status)
+            except ValueError:
+                pass
+        
+        history = system.alerts.get_alert_history(
+            since=since_dt,
+            status=alert_status,
+            limit=limit
+        )
+        
+        return {
+            "alerts": history,
+            "total": len(history)
+        }
+    except Exception as e:
+        logger.error(f"获取告警历史失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/check")
-async def check_condition(
-    rule_id: str,
-    value: float,
-    labels: Optional[dict] = None
+
+@router.get("/alerts/rules", response_model=List[AlertRuleResponse])
+async def get_alert_rules(system=Depends(get_monitoring_system)):
+    """
+    获取告警规则列表
+    """
+    try:
+        rules = system.alerts.list_rules()
+        return rules
+    except Exception as e:
+        logger.error(f"获取告警规则失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/alerts/rules/{rule_name}/silence")
+async def silence_alert(
+    rule_name: str,
+    duration_seconds: int = Query(3600, ge=60, le=86400),
+    system=Depends(get_monitoring_system)
 ):
     """
-    检查条件
+    静默告警规则
     
-    v2.0 Phase 2: 监控告警
+    Args:
+        rule_name: 规则名称
+        duration_seconds: 静默时长（秒）
     """
-    alert = await alert_manager.check_condition(rule_id, value, labels or {})
-    
-    if alert:
-        return {
-            "triggered": True,
-            "alert": {
-                "alert_id": alert.alert_id,
-                "severity": alert.severity.value,
-                "message": alert.message
+    try:
+        success = system.alerts.silence_alert(rule_name, duration_seconds)
+        if success:
+            return {
+                "message": f"告警规则 {rule_name} 已静默 {duration_seconds} 秒"
             }
+        else:
+            raise HTTPException(status_code=404, detail=f"未找到告警规则: {rule_name}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"静默告警失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/alerts/rules/{rule_name}/resolve")
+async def resolve_alert(
+    rule_name: str,
+    system=Depends(get_monitoring_system)
+):
+    """
+    手动解决告警
+    
+    Args:
+        rule_name: 规则名称
+    """
+    try:
+        success = await system.alerts.resolve_alert(rule_name)
+        if success:
+            return {
+                "message": f"告警 {rule_name} 已解决"
+            }
+        else:
+            raise HTTPException(status_code=404, detail=f"未找到活跃告警: {rule_name}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"解决告警失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/logs")
+async def query_logs(
+    level: Optional[str] = Query(None, regex="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$"),
+    keyword: Optional[str] = None,
+    since: Optional[str] = None,
+    limit: int = Query(100, ge=1, le=1000),
+    system=Depends(get_monitoring_system)
+):
+    """
+    查询日志
+    
+    Args:
+        level: 日志级别
+        keyword: 关键词
+        since: 开始时间
+        limit: 返回数量
+    """
+    try:
+        from datetime import datetime as dt
+        
+        # 构建查询条件
+        filters = {}
+        if level:
+            filters["level"] = level.upper()
+        if keyword:
+            filters["keyword"] = keyword
+        if since:
+            filters["since"] = dt.fromisoformat(since)
+        
+        # 获取日志（这里简化处理，实际应该从日志收集系统查询）
+        logs = system.logger.get_log_records(limit=limit, **filters) if hasattr(system.logger, 'get_log_records') else []
+        
+        return {
+            "logs": logs,
+            "total": len(logs),
+            "filters": filters
         }
-    
-    return {"triggered": False}
+    except Exception as e:
+        logger.error(f"查询日志失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# 数据流水线API
-class CreateDatasetRequest(BaseModel):
-    name: str
-    description: Optional[str] = None
 
-class RunPipelineRequest(BaseModel):
-    dataset_id: str
-    steps: List[str]
-    config: Optional[dict] = None
+@router.get("/tracing/{trace_id}", response_model=TracingResponse)
+async def get_trace(
+    trace_id: str,
+    system=Depends(get_monitoring_system)
+):
+    """
+    获取指定Trace的详情
+    
+    Args:
+        trace_id: Trace ID
+    """
+    try:
+        spans = system.tracing.get_trace(trace_id)
+        
+        if not spans:
+            raise HTTPException(status_code=404, detail=f"未找到Trace: {trace_id}")
+        
+        total_duration = max(span.duration_ms for span in spans) if spans else 0
+        
+        return {
+            "trace_id": trace_id,
+            "spans_count": len(spans),
+            "total_duration_ms": total_duration,
+            "spans": [span.to_dict() for span in spans]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取Trace失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/data/datasets")
-async def create_dataset(request: CreateDatasetRequest, current_user = Depends(get_current_user)):
-    """
-    创建数据集
-    
-    v2.0 Phase 2: 数据流水线
-    """
-    dataset = await data_pipeline.create_dataset(
-        name=request.name,
-        description=request.description or "",
-        user_id=str(current_user.id)
-    )
-    
-    return dataset
 
-@router.post("/data/pipelines/run")
-async def run_pipeline(request: RunPipelineRequest, current_user = Depends(get_current_user)):
+@router.get("/tracing")
+async def list_traces(
+    limit: int = Query(100, ge=1, le=1000),
+    system=Depends(get_monitoring_system)
+):
     """
-    执行数据处理流水线
-    
-    v2.0 Phase 2: 数据流水线
+    列出最近的Traces
     """
-    from pipeline.data.pipeline import DataStep
-    
-    steps = [DataStep(s) for s in request.steps]
-    
-    result = await data_pipeline.run_pipeline(
-        dataset_id=request.dataset_id,
-        steps=steps,
-        config=request.config or {}
-    )
-    
-    return result
+    try:
+        all_spans = system.tracing.export_all()[-limit:]
+        
+        # 按trace_id分组
+        traces = {}
+        for span in all_spans:
+            trace_id = span.get('context', {}).get('trace_id')
+            if trace_id:
+                if trace_id not in traces:
+                    traces[trace_id] = []
+                traces[trace_id].append(span)
+        
+        result = []
+        for trace_id, spans in traces.items():
+            total_duration = max(
+                span.get('duration_ms', 0) 
+                for span in spans
+            )
+            result.append({
+                "trace_id": trace_id,
+                "spans_count": len(spans),
+                "total_duration_ms": total_duration,
+                "start_time": spans[0].get('start_time', ''),
+                "name": spans[0].get('name', '')
+            })
+        
+        return {
+            "traces": result,
+            "total": len(result)
+        }
+    except Exception as e:
+        logger.error(f"列出Traces失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/data/datasets/{dataset_id}/versions")
-async def get_dataset_versions(dataset_id: str):
+
+@router.get("/status")
+async def get_monitoring_status(system=Depends(get_monitoring_system)):
     """
-    获取数据集版本
+    获取监控系统整体状态
+    """
+    try:
+        status = system.get_status()
+        return status
+    except Exception as e:
+        logger.error(f"获取监控状态失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/uptime")
+async def get_uptime(system=Depends(get_monitoring_system)):
+    """
+    获取系统运行时间
+    """
+    try:
+        uptime = system.get_uptime()
+        return {
+            "uptime_seconds": uptime,
+            "uptime_formatted": format_duration(uptime)
+        }
+    except Exception as e:
+        logger.error(f"获取运行时间失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== 辅助函数 ====================
+
+def format_duration(seconds: float) -> str:
+    """
+    格式化时长
     
-    v2.0 Phase 2: 数据流水线
+    Args:
+        seconds: 秒数
+        
+    Returns:
+        格式化的时间字符串
     """
-    versions = await data_pipeline.get_versions(dataset_id)
-    return {"versions": versions}
+    if seconds < 60:
+        return f"{seconds:.0f}s"
+    elif seconds < 3600:
+        minutes = seconds / 60
+        return f"{minutes:.0f}m"
+    elif seconds < 86400:
+        hours = seconds / 3600
+        return f"{hours:.0f}h"
+    else:
+        days = seconds / 86400
+        return f"{days:.0f}d"
+
+
+from fastapi.responses import Response
+
+# 重新定义prometheus端点的Response
+@router.get("/metrics/prometheus", response_class=Response)
+async def get_prometheus_metrics(system=Depends(get_monitoring_system)):
+    """
+    Prometheus格式指标
+    """
+    try:
+        prometheus_format = system.metrics.to_prometheus_format()
+        return Response(
+            content=prometheus_format,
+            media_type="text/plain"
+        )
+    except Exception as e:
+        logger.error(f"获取Prometheus指标失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,35 @@
+# 智能外呼配置
+name: "智能外呼"
+version: "1.0.0"
+description: "AI驱动的自动外呼系统，支持智能路由和答录机检测"
+
+calling_hours:
+  start: "09:00"
+  end: "21:00"
+  timezone: "Asia/Shanghai"
+
+call_settings:
+  max_duration: 300
+  retry_times: 3
+  retry_interval: 60
+  am_detection: true
+
+voice:
+  tts_engine: "azure"
+  voice: "zh-CN-XiaoxiaoNeural"
+  speed: 1.0
+  pitch: 0
+
+templates:
+  marketing: "data/templates/marketing.txt"
+  notification: "data/templates/notification.txt"
+  survey: "data/templates/survey.txt"
+
+routing:
+  intelligent: true
+  skill_based: false
+
+compliance:
+  record_calls: true
+  consent_required: false
+  blacklist_enabled: true

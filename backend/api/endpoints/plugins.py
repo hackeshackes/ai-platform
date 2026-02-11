@@ -1,341 +1,416 @@
 """
-Plugin Marketplace API端点 v2.4
+Plugin API Endpoints - Plugin API端点
+提供RESTful API接口
 """
-from fastapi import APIRouter, HTTPException
-from typing import List, Optional, Dict, Any
 
-# 直接导入模块
-import importlib.util
-import os
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+from flask import Blueprint, request, jsonify, send_file
+import logging
 
-backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-module_path = os.path.join(backend_dir, 'plugins/engine.py')
+from .registry import PluginRegistry, PluginMetadata
+from .manager import PluginManager
+from .market import PluginMarket
+from .sandbox import PluginSandbox, SandboxConfig
 
-spec = importlib.util.spec_from_file_location("plugins_module", module_path)
-module = importlib.util.module_from_spec(spec)
+logger = logging.getLogger(__name__)
 
-try:
-    spec.loader.exec_module(module)
-    plugin_engine = module.plugin_marketplace_engine
-    PluginCategory = module.PluginCategory
-    PluginStatus = module.PluginStatus
-except Exception as e:
-    print(f"Failed to import plugins module: {e}")
-    plugin_engine = None
-    PluginCategory = None
-    PluginStatus = None
+# 创建Blueprint
+plugins_bp = Blueprint('plugins', __name__, url_prefix='/api/v1/plugins')
 
-router = APIRouter()
+# 全局实例（由app初始化时注入）
+registry: Optional[PluginRegistry] = None
+manager: Optional[PluginManager] = None
+market: Optional[PluginMarket] = None
+sandbox: Optional[PluginSandbox] = None
 
-from pydantic import BaseModel
 
-class RegisterPluginModel(BaseModel):
-    name: str
-    description: str
-    category: str
-    version: str
-    author: str
-    repository_url: Optional[str] = None
-    tags: Optional[List[str]] = None
-
-class AddVersionModel(BaseModel):
-    version: str
-    changelog: str = ""
-    download_url: Optional[str] = None
-
-class InstallPluginModel(BaseModel):
-    version: str = "latest"
-    config: Optional[Dict] = None
-
-class UpdateConfigModel(BaseModel):
-    config: Dict
-
-class AddReviewModel(BaseModel):
-    user_id: str
-    rating: int
-    title: str
-    content: str
-
-# ==================== 插件管理 ====================
-
-@router.get("/plugins")
-async def list_plugins(
-    category: Optional[str] = None,
-    status: Optional[str] = None,
-    search: Optional[str] = None
-):
-    """列出插件"""
-    pcategory = PluginCategory(category) if category else None
-    pstatus = PluginStatus(status) if status else None
+def init_app(app):
+    """初始化插件模块"""
+    global registry, manager, market, sandbox
     
-    plugins = plugin_engine.list_plugins(
-        category=pcategory,
-        status=pstatus,
-        search=search
-    )
+    registry = PluginRegistry()
+    manager = PluginManager(registry)
+    market = PluginMarket(registry, manager)
+    sandbox = PluginSandbox()
     
-    return {
-        "total": len(plugins),
-        "plugins": [
-            {
-                "plugin_id": p.plugin_id,
-                "name": p.name,
-                "description": p.description,
-                "category": p.category.value,
-                "version": p.version,
-                "status": p.status.value,
-                "author": p.author,
-                "rating": p.metrics.get("rating", 0),
-                "downloads": p.metrics.get("downloads", 0)
-            }
-            for p in plugins
-        ]
-    }
+    logger.info("Plugin API initialized")
 
-@router.post("/plugins")
-async def register_plugin(request: RegisterPluginModel):
-    """注册插件"""
-    try:
-        category = PluginCategory(request.category)
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid category: {request.category}")
+
+def require_plugins(func):
+    """依赖检查装饰器"""
+    def wrapper(*args, **kwargs):
+        if not all([registry, manager, market]):
+            return jsonify({'error': 'Plugin system not initialized'}), 500
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+# ============ 市场API ============
+
+@plugins_bp.route('/market', methods=['GET'])
+@require_plugins
+def browse_market():
+    """浏览市场"""
+    category = request.args.get('category')
+    sort_by = request.args.get('sort_by', 'popularity')
+    page = int(request.args.get('page', 1))
+    page_size = int(request.args.get('page_size', 20))
     
-    plugin = plugin_engine.register_plugin(
-        name=request.name,
-        description=request.description,
+    result = market.browse_market(
         category=category,
-        version=request.version,
-        author=request.author,
-        repository_url=request.repository_url,
-        tags=request.tags
+        sort_by=sort_by,
+        page=page,
+        page_size=page_size
     )
     
-    return {
-        "plugin_id": plugin.plugin_id,
-        "name": plugin.name,
-        "message": "Plugin registered"
-    }
+    return jsonify(result)
 
-@router.get("/plugins/{plugin_id}")
-async def get_plugin(plugin_id: str):
-    """获取插件详情"""
-    plugin = plugin_engine.get_plugin(plugin_id)
-    if not plugin:
-        raise HTTPException(status_code=404, detail="Plugin not found")
+
+@plugins_bp.route('/search', methods=['GET'])
+@require_plugins
+def search_plugins():
+    """搜索插件"""
+    query = request.args.get('q', '')
+    category = request.args.get('category')
+    min_rating = request.args.get('min_rating', type=float)
+    page = int(request.args.get('page', 1))
+    page_size = int(request.args.get('page_size', 20))
     
-    versions = plugin_engine.get_versions(plugin_id)
-    
-    return {
-        "plugin_id": plugin.plugin_id,
-        "name": plugin.name,
-        "description": plugin.description,
-        "category": plugin.category.value,
-        "version": plugin.version,
-        "status": plugin.status.value,
-        "author": plugin.author,
-        "repository_url": plugin.repository_url,
-        "tags": plugin.tags,
-        "dependencies": plugin.dependencies,
-        "config_schema": plugin.config_schema,
-        "metrics": plugin.metrics,
-        "versions_count": len(versions)
-    }
-
-@router.put("/plugins/{plugin_id}")
-async def update_plugin(
-    plugin_id: str,
-    description: Optional[str] = None,
-    tags: Optional[List[str]] = None
-):
-    """更新插件"""
-    result = plugin_engine.update_plugin(
-        plugin_id=plugin_id,
-        description=description,
-        tags=tags
-    )
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not found")
-    return {"message": "Plugin updated"}
-
-@router.post("/plugins/{plugin_id}/submit")
-async def submit_for_review(plugin_id: str):
-    """提交审核"""
-    result = plugin_engine.submit_for_review(plugin_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not found")
-    return {"message": "Plugin submitted for review"}
-
-@router.post("/plugins/{plugin_id}/approve")
-async def approve_plugin(plugin_id: str):
-    """批准插件"""
-    result = plugin_engine.approve_plugin(plugin_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not found")
-    return {"message": "Plugin approved"}
-
-@router.post("/plugins/{plugin_id}/reject")
-async def reject_plugin(plugin_id: str, reason: str):
-    """拒绝插件"""
-    result = plugin_engine.reject_plugin(plugin_id, reason)
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not found")
-    return {"message": "Plugin rejected"}
-
-# ==================== 版本管理 ====================
-
-@router.get("/plugins/{plugin_id}/versions")
-async def get_versions(plugin_id: str):
-    """获取版本列表"""
-    versions = plugin_engine.get_versions(plugin_id)
-    
-    return {
-        "total": len(versions),
-        "versions": [
-            {
-                "version_id": v.version_id,
-                "version": v.version,
-                "changelog": v.changelog,
-                "file_size": v.file_size,
-                "created_at": v.created_at.isoformat()
-            }
-            for v in versions
-        ]
-    }
-
-@router.post("/plugins/{plugin_id}/versions")
-async def add_version(plugin_id: str, request: AddVersionModel):
-    """添加版本"""
-    try:
-        version = plugin_engine.add_version(
-            plugin_id=plugin_id,
-            version=request.version,
-            changelog=request.changelog,
-            download_url=request.download_url
-        )
-        return {
-            "version_id": version.version_id,
-            "version": version.version,
-            "message": "Version added"
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-
-# ==================== 评论管理 ====================
-
-@router.get("/plugins/{plugin_id}/reviews")
-async def get_reviews(plugin_id: str):
-    """获取评论"""
-    reviews = plugin_engine.get_reviews(plugin_id)
-    
-    return {
-        "total": len(reviews),
-        "reviews": [
-            {
-                "review_id": r.review_id,
-                "user_id": r.user_id,
-                "rating": r.rating,
-                "title": r.title,
-                "content": r.content,
-                "created_at": r.created_at.isoformat()
-            }
-            for r in reviews
-        ]
-    }
-
-@router.post("/plugins/{plugin_id}/reviews")
-async def add_review(plugin_id: str, request: AddReviewModel):
-    """添加评论"""
-    if not 1 <= request.rating <= 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
-    
-    review = plugin_engine.add_review(
-        plugin_id=plugin_id,
-        user_id=request.user_id,
-        rating=request.rating,
-        title=request.title,
-        content=request.content
+    result = market.search_market(
+        query=query,
+        category=category,
+        min_rating=min_rating,
+        page=page,
+        page_size=page_size
     )
     
-    return {
-        "review_id": review.review_id,
-        "rating": review.rating,
-        "message": "Review added"
-    }
+    return jsonify(result)
 
-# ==================== 插件安装 ====================
 
-@router.get("/installed")
-async def get_installed_plugins():
-    """获取已安装插件"""
-    installations = plugin_engine.get_installed_plugins()
+@plugins_bp.route('/market/<plugin_id>', methods=['GET'])
+@require_plugins
+def get_market_plugin(plugin_id: str):
+    """获取市场插件详情"""
+    details = market.get_plugin_details(plugin_id)
     
-    return {
-        "total": len(installations),
-        "plugins": [
-            {
-                "installation_id": i.installation_id,
-                "plugin_id": i.plugin_id,
-                "version": i.version,
-                "status": i.status.value,
-                "enabled": i.enabled
-            }
-            for i in installations
-        ]
-    }
+    if not details:
+        return jsonify({'error': 'Plugin not found'}), 404
+    
+    return jsonify(details)
 
-@router.post("/plugins/{plugin_id}/install")
-async def install_plugin(plugin_id: str, request: InstallPluginModel):
+
+@plugins_bp.route('/featured', methods=['GET'])
+@require_plugins
+def get_featured():
+    """获取推荐插件"""
+    return jsonify({'plugins': market.get_featured_plugins()})
+
+
+# ============ 已安装插件API ============
+
+@plugins_bp.route('/installed', methods=['GET'])
+@require_plugins
+def list_installed():
+    """列出已安装插件"""
+    installed = manager.list_installed()
+    return jsonify({'plugins': installed})
+
+
+@plugins_bp.route('/installed/<plugin_id>', methods=['GET'])
+@require_plugins
+def get_installed_plugin(plugin_id: str):
+    """获取已安装插件详情"""
+    path = manager.get_plugin_path(plugin_id)
+    
+    if not path:
+        return jsonify({'error': 'Plugin not installed'}), 404
+    
+    metadata = registry.get(plugin_id)
+    is_enabled = manager.is_enabled(plugin_id)
+    
+    return jsonify({
+        'plugin_id': plugin_id,
+        'metadata': metadata.to_dict() if metadata else None,
+        'path': path,
+        'enabled': is_enabled
+    })
+
+
+# ============ 安装/卸载API ============
+
+@plugins_bp.route('/install', methods=['POST'])
+@require_plugins
+def install_plugin():
     """安装插件"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+    
+    source_type = data.get('type', 'market')  # market, url, source
+    
     try:
-        installation = plugin_engine.install_plugin(
-            plugin_id=plugin_id,
-            version=request.version,
-            config=request.config
-        )
-        return {
-            "installation_id": installation.installation_id,
-            "status": installation.status.value,
-            "message": "Plugin installed"
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        if source_type == 'market':
+            plugin_id = data.get('plugin_id')
+            if not plugin_id:
+                return jsonify({'error': 'plugin_id required'}), 400
+            result = manager.install_from_market(plugin_id)
+        
+        elif source_type == 'url':
+            url = data.get('url')
+            if not url:
+                return jsonify({'error': 'url required'}), 400
+            result = manager.install_from_url(url)
+        
+        elif source_type == 'source':
+            source_path = data.get('source_path')
+            if not source_path:
+                return jsonify({'error': 'source_path required'}), 400
+            result = manager.install_from_source(source_path)
+        
+        else:
+            return jsonify({'error': f'Invalid source type: {source_type}'}), 400
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        logger.error(f"Install failed: {e}")
+        return jsonify({'error': str(e)}), 400
 
-@router.post("/plugins/{plugin_id}/uninstall")
-async def uninstall_plugin(plugin_id: str):
+
+@plugins_bp.route('/uninstall', methods=['POST'])
+@require_plugins
+def uninstall_plugin():
     """卸载插件"""
-    result = plugin_engine.uninstall_plugin(plugin_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not installed")
-    return {"message": "Plugin uninstalled"}
+    data = request.get_json()
+    
+    if not data or 'plugin_id' not in data:
+        return jsonify({'error': 'plugin_id required'}), 400
+    
+    plugin_id = data['plugin_id']
+    remove_data = data.get('remove_data', True)
+    
+    try:
+        result = manager.uninstall(plugin_id, remove_data=remove_data)
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Uninstall failed: {e}")
+        return jsonify({'error': str(e)}), 400
 
-@router.put("/plugins/{plugin_id}/config")
-async def update_plugin_config(plugin_id: str, request: UpdateConfigModel):
-    """更新插件配置"""
-    result = plugin_engine.update_plugin_config(plugin_id, request.config)
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not installed")
-    return {"message": "Config updated"}
 
-@router.put("/plugins/{plugin_id}/enable")
-async def enable_plugin(plugin_id: str, enabled: bool):
-    """启用/禁用插件"""
-    result = plugin_engine.enable_plugin(plugin_id, enabled)
-    if not result:
-        raise HTTPException(status_code=404, detail="Plugin not installed")
-    return {"message": f"Plugin {'enabled' if enabled else 'disabled'}"}
+@plugins_bp.route('/enable', methods=['POST'])
+@require_plugins
+def enable_plugin():
+    """启用插件"""
+    data = request.get_json()
+    
+    if not data or 'plugin_id' not in data:
+        return jsonify({'error': 'plugin_id required'}), 400
+    
+    try:
+        result = manager.enable(data['plugin_id'])
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
-# ==================== 统计信息 ====================
 
-@router.get("/summary")
-async def get_summary():
-    """获取统计"""
-    return plugin_engine.get_summary()
+@plugins_bp.route('/disable', methods=['POST'])
+@require_plugins
+def disable_plugin():
+    """禁用插件"""
+    data = request.get_json()
+    
+    if not data or 'plugin_id' not in data:
+        return jsonify({'error': 'plugin_id required'}), 400
+    
+    try:
+        result = manager.disable(data['plugin_id'])
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
-@router.get("/health")
-async def plugins_health():
-    """健康检查"""
-    return {
-        "status": "healthy",
-        "plugins": len(plugin_engine.plugins),
-        "installed": len(plugin_engine.installations)
-    }
+
+# ============ 发布API ============
+
+@plugins_bp.route('/publish', methods=['POST'])
+@require_plugins
+def publish_plugin():
+    """发布插件到市场"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+    
+    required_fields = ['name', 'version', 'description', 'author', 'category']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+    
+    try:
+        # 创建元数据
+        metadata = PluginMetadata(
+            plugin_id=data.get('plugin_id', ''),
+            name=data['name'],
+            version=data['version'],
+            description=data['description'],
+            author=data['author'],
+            category=data['category'],
+            tags=data.get('tags', []),
+            dependencies=data.get('dependencies', {}),
+            permissions=data.get('permissions', []),
+            entry_point=data.get('entry_point', 'plugin.py'),
+            homepage=data.get('homepage', ''),
+            repository=data.get('repository', ''),
+            license=data.get('license', 'MIT')
+        )
+        
+        # 验证
+        errors = registry.validate_metadata(metadata)
+        if errors:
+            return jsonify({'error': 'Validation failed', 'details': errors}), 400
+        
+        # 生成plugin_id
+        if not metadata.plugin_id:
+            metadata.plugin_id = registry.generate_plugin_id(metadata.name)
+        
+        # 注册到市场
+        registry.register(metadata)
+        
+        return jsonify({
+            'status': 'success',
+            'plugin_id': metadata.plugin_id,
+            'message': 'Plugin published successfully'
+        })
+    
+    except Exception as e:
+        logger.error(f"Publish failed: {e}")
+        return jsonify({'error': str(e)}), 400
+
+
+# ============ 评分API ============
+
+@plugins_bp.route('/rate', methods=['POST'])
+@require_plugins
+def rate_plugin():
+    """评分插件"""
+    data = request.get_json()
+    
+    required_fields = ['plugin_id', 'user_id', 'rating']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing required field: {field}'}), 400
+    
+    try:
+        result = market.rate_plugin(
+            plugin_id=data['plugin_id'],
+            user_id=data['user_id'],
+            rating=data['rating'],
+            review=data.get('review')
+        )
+        return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+
+# ============ 沙箱执行API ============
+
+@plugins_bp.route('/execute', methods=['POST'])
+@require_plugins
+def execute_plugin():
+    """在沙箱中执行代码"""
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'Request body required'}), 400
+    
+    code = data.get('code')
+    plugin_id = data.get('plugin_id')
+    function_name = data.get('function', 'main')
+    context = data.get('context', {})
+    
+    try:
+        if plugin_id:
+            # 执行已安装的插件
+            result = sandbox.execute_plugin(
+                plugin_id=plugin_id,
+                function_name=function_name,
+                args=data.get('args', []),
+                kwargs=data.get('kwargs', {})
+            )
+        elif code:
+            # 执行临时代码
+            result = sandbox.execute_python(
+                code=code,
+                plugin_id=data.get('plugin_id', 'anonymous'),
+                context=context
+            )
+        else:
+            return jsonify({'error': 'code or plugin_id required'}), 400
+        
+        return jsonify({
+            'success': result.success,
+            'output': result.output,
+            'error': result.error,
+            'return_code': result.return_code,
+            'execution_time_ms': result.execution_time_ms
+        })
+    
+    except Exception as e:
+        logger.error(f"Execution failed: {e}")
+        return jsonify({'error': str(e)}), 400
+
+
+# ============ 下载API ============
+
+@plugins_bp.route('/download/<plugin_id>', methods=['GET'])
+@require_plugins
+def download_plugin(plugin_id: str):
+    """下载插件"""
+    try:
+        download_info = market.download_plugin(plugin_id)
+        plugin_dir = manager.get_plugin_path(plugin_id)
+        
+        if not plugin_dir:
+            return jsonify({'error': 'Plugin not found'}), 404
+        
+        # 返回插件目录下的文件列表或打包下载
+        import zipfile
+        import os
+        import tempfile
+        
+        zip_path = os.path.join(tempfile.gettempdir(), f"{plugin_id}.zip")
+        
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for root, dirs, files in os.walk(plugin_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, plugin_dir)
+                    zf.write(file_path, arcname)
+        
+        return send_file(
+            zip_path,
+            as_attachment=True,
+            download_name=f"{plugin_id}.zip"
+        )
+    
+    except Exception as e:
+        logger.error(f"Download failed: {e}")
+        return jsonify({'error': str(e)}), 400
+
+
+# ============ 统计API ============
+
+@plugins_bp.route('/stats', methods=['GET'])
+@require_plugins
+def get_stats():
+    """获取市场统计"""
+    categories = registry.get_categories()
+    installed_count = len(manager.list_installed())
+    
+    return jsonify({
+        'total_plugins': len(registry.plugins),
+        'installed_plugins': installed_count,
+        'categories': categories
+    })

@@ -1,0 +1,116 @@
+"""
+V9 Adaptive Learning API
+自适应学习API
+"""
+
+from typing import Dict, List, Optional
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/v9/adaptive", tags=["V9 Adaptive Learning"])
+
+# 模拟数据
+_patterns = {}
+_q_learning_stats = {"state_dim": 128, "action_dim": 64}
+
+class IntentRequest(BaseModel):
+    text: str
+
+class IntentResponse(BaseModel):
+    intent: Dict
+    entities: List[Dict]
+
+class ExtractRequest(BaseModel):
+    text: str
+
+class PatternRequest(BaseModel):
+    text: str
+    context: Dict = {}
+
+@router.get("/intent/parse")
+async def parse_intent(request: IntentRequest):
+    """解析用户意图"""
+    text = request.text.lower()
+    
+    # 意图识别
+    if "创建" in text or "生成" in text:
+        intent_type = "CREATION"
+    elif "分析" in text or "统计" in text:
+        intent_type = "ANALYSIS"
+    elif "查询" in text or "搜索" in text:
+        intent_type = "QUERY"
+    elif "学习" in text or "训练" in text:
+        intent_type = "LEARNING"
+    else:
+        intent_type = "ACTION"
+    
+    return {
+        "intent": {
+            "type": intent_type,
+            "confidence": 0.92,
+            "entities": [],
+            "slots": {}
+        }
+    }
+
+@router.post("/entities/extract")
+async def extract_entities(request: ExtractRequest):
+    """提取实体"""
+    text = request.text
+    entities = []
+    
+    import re
+    numbers = re.findall(r'\d+\.?\d*', text)
+    for n in numbers:
+        entities.append({"type": "NUMBER", "value": n})
+    
+    dates = re.findall(r'\d{4}[-\/]\d{1,2}', text)
+    for d in dates:
+        entities.append({"type": "DATE", "value": d})
+    
+    emails = re.findall(r'[\w\.-]+@[\w\.-]+', text)
+    for e in emails:
+        entities.append({"type": "EMAIL", "value": e})
+    
+    return entities
+
+@router.get("/strategies/q-learning/info")
+async def q_learning_info():
+    """Q-Learning策略信息"""
+    return {
+        "algorithm": "Q-Learning",
+        "state_dim": 128,
+        "action_dim": 64,
+        "learning_rate": 0.1,
+        "discount_factor": 0.95,
+        "exploration_rate": 0.1
+    }
+
+@router.post("/patterns/extract")
+async def extract_pattern(request: PatternRequest):
+    """提取交互模式"""
+    import uuid
+    pattern_id = uuid.uuid4().hex[:16]
+    _patterns[pattern_id] = {
+        "intent": request.text,
+        "context": request.context,
+        "created_at": "2026-02-10T15:00:00"
+    }
+    return {"pattern_id": pattern_id, "success": True}
+
+@router.get("/evaluate/{agent_id}")
+async def evaluate_agent(agent_id: str):
+    """评估Agent学习效果"""
+    return {
+        "agent_id": agent_id,
+        "success_rate": 0.85,
+        "improvement_rate": 0.23,
+        "consistency": 0.91,
+        "total_interactions": 156,
+        "last_updated": "2026-02-10T15:00:00"
+    }
+
+@router.get("/patterns")
+async def list_patterns():
+    """列出学习模式"""
+    return {"patterns": list(_patterns.values()), "total": len(_patterns)}

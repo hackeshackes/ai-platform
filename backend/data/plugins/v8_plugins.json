@@ -1,0 +1,5 @@
+[
+  {"id": "search-tool", "name": "search-tool", "display_name": "搜索工具", "description": "提供强大的搜索功能", "version": "1.0.0", "category": "tool"},
+  {"id": "coding-agent", "name": "coding-agent", "display_name": "编程助手", "description": "专业的代码生成Agent", "version": "1.0.0", "category": "agent"},
+  {"id": "data-connector", "name": "data-connector", "display_name": "数据连接器", "description": "连接各种数据源", "version": "1.0.0", "category": "integration"}
+]

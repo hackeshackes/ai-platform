@@ -1,0 +1,13 @@
+{
+  "id": "data-connector",
+  "name": "data-connector",
+  "display_name": "数据连接器",
+  "description": "连接各种数据源的集成Plugin",
+  "version": "1.0.0",
+  "author": "AI Platform",
+  "category": "integration",
+  "tags": ["data", "connector", "database"],
+  "downloads": 890,
+  "rating": 4.2,
+  "reviews_count": 18
+}

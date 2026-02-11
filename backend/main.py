@@ -15,6 +15,16 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from api.routes import router
+
+# V9 API Routes
+from api.endpoints.v9_adaptive import router as v9_adaptive_router
+from api.endpoints.v9_federated import router as v9_federated_router
+from api.endpoints.v9_decision import router as v9_decision_router
+
+# V9 API Routes
+from api.endpoints.v9_adaptive import router as v9_adaptive_router
+from api.endpoints.v9_federated import router as v9_federated_router
+from api.endpoints.v9_decision import router as v9_decision_router
 from core.config import settings as config_settings
 from core.logging import logger
 
@@ -38,6 +48,11 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(router, prefix="/api/v1")
+
+# V9 Routes
+app.include_router(v9_adaptive_router, prefix="/api/v1")
+app.include_router(v9_federated_router, prefix="/api/v1")
+app.include_router(v9_decision_router, prefix="/api/v1")
 
 # API根路径 - 列出所有可用端点
 @app.get("/api/v1")

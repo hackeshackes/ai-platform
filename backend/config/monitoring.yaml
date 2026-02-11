@@ -1,0 +1,111 @@
+# 监控系统配置文件
+# v10 Monitoring Configuration
+
+# 服务名称
+service_name: "ai-platform"
+
+# 日志配置
+logging:
+  level: "INFO"
+  json_format: true
+  log_file: "./logs/app.log"
+  include_fields:
+    - request_id
+    - user_id
+
+# 健康检查配置
+health:
+  check_interval: 30        # 检查间隔（秒）
+  timeout: 10               # 检查超时（秒）
+
+# 性能指标配置
+metrics:
+  histogram_buckets:       # 直方图百分位桶
+    - 0.1
+    - 0.25
+    - 0.5
+    - 0.75
+    - 0.9
+    - 0.95
+    - 0.99
+  max_histogram_samples: 1000  # 最大样本数
+  enable_prometheus: true      # 启用Prometheus端点
+
+# 告警配置
+alerts:
+  evaluation_interval: 15     # 评估间隔（秒）
+  max_history_size: 1000      # 最大历史记录数
+  channels:                   # 通知渠道
+    critical:
+      - log
+      - webhook
+    warning:
+      - log
+    info:
+      - log
+
+# 告警规则配置
+alert_rules:
+  - name: "HighCPU"
+    condition: "cpu_usage > 80"
+    severity: "warning"
+    message: "CPU使用率超过80%"
+    duration_seconds: 60
+
+  - name: "HighMemory"
+    condition: "memory_usage > 85"
+    severity: "warning"
+    message: "内存使用率超过85%"
+    duration_seconds: 60
+
+  - name: "HighLatency"
+    condition: "api_latency_p95 > 1.0"
+    severity: "warning"
+    message: "API P95延迟超过1秒"
+    duration_seconds: 120
+
+  - name: "HighErrorRate"
+    condition: "error_rate > 1.0"
+    severity: "critical"
+    message: "错误率超过1%"
+    duration_seconds: 60
+
+  - name: "DatabaseDown"
+    condition: "database_status == 0"
+    severity: "critical"
+    message: "数据库连接失败"
+    duration_seconds: 10
+
+  - name: "RedisDown"
+    condition: "redis_status == 0"
+    severity: "warning"
+    message: "Redis连接失败"
+    duration_seconds: 30
+
+# 链路追踪配置
+tracing:
+  service_name: "ai-platform"
+  sampling_rate: 1.0          # 采样率 (0.0 - 1.0)
+  max_spans: 1000            # 最大span数量
+  export_on_finish: true      # 完成时导出
+
+# 数据库连接配置（用于健康检查）
+database:
+  host: "localhost"
+  port: 5432
+  database: "ai_platform"
+  enabled: true
+
+# Redis配置（用于健康检查）
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  enabled: false
+
+# Webhook通知配置
+webhook:
+  url: "http://localhost:5000/webhook/alert"
+  headers:
+    Content-Type: "application/json"
+  timeout: 10

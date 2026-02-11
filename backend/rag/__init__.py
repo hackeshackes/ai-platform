@@ -6,7 +6,7 @@ RAG Module - Enhanced Knowledge Base Retrieval
 - 重排序 (Reranker)
 - 多格式文档解析 (Document Parser)
 """
-from backend.rag.enhanced_retriever import (
+from .enhanced_retriever import (
     HybridRetriever,
     SearchType,
     HybridSearchConfig,
@@ -15,7 +15,7 @@ from backend.rag.enhanced_retriever import (
     create_hybrid_retriever,
     SearchResult
 )
-from backend.rag.reranker import (
+from .reranker import (
     RerankerPipeline,
     RerankConfig,
     RerankStrategy,
@@ -25,7 +25,7 @@ from backend.rag.reranker import (
     create_reranker,
     RerankResult
 )
-from backend.rag.document_parser import (
+from .document_parser import (
     DocumentParser,
     DocumentFormat,
     MarkdownParser,
